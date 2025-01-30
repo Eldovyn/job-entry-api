@@ -26,6 +26,7 @@ class UserModel(db.Model):
         "ResetPasswordModel", uselist=False, back_populates="user"
     )
     user_avatar = relationship("UserAvatarModel", uselist=False, back_populates="user")
+    is_admin = Column(Boolean, nullable=False, default=False)
 
     def __init__(self, user_id, username, email, password):
         self.user_id = user_id
