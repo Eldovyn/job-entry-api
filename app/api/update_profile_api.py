@@ -6,7 +6,7 @@ update_profile_router = Blueprint("update_profile_router", __name__)
 user_controller = UserController()
 
 
-@update_profile_router.patch("/netpoll/password")
+@update_profile_router.patch("/job-entry/password")
 @jwt_required()
 async def update_password():
     current_user = get_jwt_identity()
@@ -18,7 +18,7 @@ async def update_password():
     )
 
 
-@update_profile_router.patch("/netpoll/profile")
+@update_profile_router.patch("/job-entry/profile")
 @jwt_required()
 async def update_profiles():
     current_user = get_jwt_identity()
@@ -28,7 +28,7 @@ async def update_profiles():
     return await user_controller.update_user(current_user, new_username, new_email)
 
 
-@update_profile_router.patch("/netpoll/profile/email")
+@update_profile_router.patch("/job-entry/profile/email")
 @jwt_required()
 async def update_email():
     current_user = get_jwt_identity()
@@ -37,7 +37,7 @@ async def update_email():
     return await user_controller.update_user_email(current_user, new_email)
 
 
-@update_profile_router.patch("/netpoll/profile/username")
+@update_profile_router.patch("/job-entry/profile/username")
 @jwt_required()
 async def update_username():
     current_user = get_jwt_identity()

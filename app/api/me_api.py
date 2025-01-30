@@ -6,7 +6,7 @@ me_router = Blueprint("me_router", __name__)
 user_controller = UserController()
 
 
-@me_router.get("/netpoll/@me")
+@me_router.get("/job-entry/@me")
 @jwt_required()
 async def user_login():
     current_user = get_jwt_identity()

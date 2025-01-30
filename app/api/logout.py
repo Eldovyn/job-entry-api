@@ -6,7 +6,7 @@ logout_router = Blueprint("logout_router", __name__)
 user_controller = UserController()
 
 
-@logout_router.delete("/netpoll/logout")
+@logout_router.delete("/job-entry/logout")
 @jwt_required()
 async def user_logout():
     jti = get_jwt()["jti"]

@@ -6,7 +6,7 @@ register_router = Blueprint("register_router", __name__)
 user_controller = UserController()
 
 
-@register_router.post("/netpoll/register")
+@register_router.post("/job-entry/register")
 async def user_register():
     data = request.json
     email = data.get("email", "")
