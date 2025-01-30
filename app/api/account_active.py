@@ -19,7 +19,7 @@ async def re_send_account_active_email():
     return await account_active_controller.re_send_user_account_active(email)
 
 
-@account_active_router.get("/job-entry/account-active/user-verification")
+@account_active_router.get("/job-entry/account-active/email-verification")
 async def account_active_email_verification():
     data = request.args
     token = data.get("token", "")

@@ -2,7 +2,7 @@ from flask import jsonify, render_template, redirect, url_for, request
 import datetime
 from ..databases import AccountActiveDatabase, UserDatabase
 from ..utils import TokenAccountActiveEmail, TokenAccountActiveWeb, generate_id
-from ..config import netpoll_url
+from ..config import job_entry_url
 from ..task import send_email_task
 
 
@@ -11,27 +11,43 @@ class AccountActiveController:
     async def user_account_active_page(token):
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
         if len(token.strip()) == 0:
-            return redirect(f"{netpoll_url}not-found")
+            return (
+                jsonify(
+                    {
+                        "message": "token cannot be empty",
+                        "errors": {"token": ["token cannot be empty"]},
+                    }
+                ),
+                400,
+            )
         if not (valid_token := await TokenAccountActiveWeb.get(token)):
-            return redirect(f"{netpoll_url}not-found")
+            return jsonify({"message": "token not found"}), 404
         if not (
-            user := await AccountActiveDatabase.get(
+            user_token := await AccountActiveDatabase.get(
                 "account_active", user_id=valid_token["user_id"], token_web=token
             )
         ):
-            return redirect(f"{netpoll_url}not-found")
-        if user.token_web != token:
-            return redirect(f"{netpoll_url}not-found")
-        if user.expired_at <= int(created_at):
+            return jsonify({"message": "token not found"}), 404
+        if user_token.token_web != token:
+            return jsonify({"message": "token not found"}), 404
+        if user_token.expired_at <= int(created_at):
             await AccountActiveDatabase.delete(
                 "user_id", user_id=valid_token["user_id"]
             )
-            return redirect(f"{netpoll_url}not-found")
-        return render_template(
-            "account_active/verification.html",
-            user=user.user,
-            host_url=request.host_url,
-            netpoll_url=netpoll_url,
+            return jsonify({"message": "token not found"}), 404
+        return (
+            jsonify(
+                {
+                    "message": "success get user token",
+                    "data": {
+                        "token": token,
+                        "user_id": user_token.user.user_id,
+                        "email": user_token.user.email,
+                        "username": user_token.user.username,
+                    },
+                }
+            ),
+            200,
         )
 
     @staticmethod
@@ -175,7 +191,7 @@ class AccountActiveController:
         web_token = await TokenAccountActiveWeb.insert(
             f"{user.user_id}", int(created_at)
         )
-        await AccountActiveDatabase.insert(
+        result = await AccountActiveDatabase.insert(
             generate_id(),
             f"{user.user_id}",
             email_token,
@@ -214,13 +230,18 @@ class AccountActiveController:
                 {
                     "message": "success send email active account",
                     "data": {
-                        "user_id": user.user_id,
-                        "username": user.username,
-                        "email": user.email,
-                        "is_active": user.is_active,
-                        "created_at": user.created_at,
-                        "updated_at": user.updated_at,
+                        "user": {
+                            "user_id": user.user_id,
+                            "username": user.username,
+                            "email": user.email,
+                            "is_active": user.is_active,
+                            "created_at": user.created_at,
+                            "updated_at": user.updated_at,
+                        },
                         "token": web_token,
+                        "expired_at": result.expired_at,
+                        "created_at": result.created_at,
+                        "updated_at": result.updated_at,
                     },
                 }
             ),
@@ -231,29 +252,66 @@ class AccountActiveController:
     async def user_account_active_verification(token):
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
         if len(token.strip()) == 0:
-            return redirect(f"{netpoll_url}not-found")
+            return (
+                jsonify(
+                    {
+                        "message": "token cannot be empty",
+                        "errors": {"token": ["token cannot be empty"]},
+                    }
+                ),
+                400,
+            )
         valid_token = await TokenAccountActiveEmail.get(token)
         if not valid_token:
-            return redirect(f"{netpoll_url}not-found")
+            return (
+                jsonify(
+                    {
+                        "message": "token not found",
+                    }
+                ),
+                404,
+            )
         if not (
-            token := await AccountActiveDatabase.get(
+            user_token := await AccountActiveDatabase.get(
                 "account_active_email",
                 user_id=valid_token["user_id"],
                 token_email=token,
             )
         ):
-            return redirect(f"{netpoll_url}not-found")
-        if token.expired_at <= int(created_at):
+            return (
+                jsonify(
+                    {
+                        "message": "token not found",
+                    }
+                ),
+                404,
+            )
+        if user_token.expired_at <= int(created_at):
             await AccountActiveDatabase.delete(
                 "user_id", user_id=valid_token["user_id"]
             )
-            return redirect(f"{netpoll_url}not-found")
-        user = await UserDatabase.get("user_id", user_id=valid_token["user_id"])
+            return (
+                jsonify(
+                    {
+                        "message": "token not found",
+                    }
+                ),
+                404,
+            )
         await AccountActiveDatabase.update(
-            "user_active", user_id=valid_token["user_id"]
+            "user_active", user_id=valid_token["user_id"], updated_at=created_at
         )
-        return render_template(
-            "account_active/account_verification.html",
-            user=user,
-            netpoll_url=netpoll_url,
+        return (
+            jsonify(
+                {
+                    "message": "success get user token",
+                    "data": {
+                        "token": token,
+                        "user_id": user_token.user.user_id,
+                        "email": user_token.user.email,
+                        "username": user_token.user.username,
+                    },
+                }
+            ),
+            200,
         )

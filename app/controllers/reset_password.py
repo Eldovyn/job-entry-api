@@ -2,7 +2,7 @@ from ..databases import ResetPasswordDatabase, UserDatabase
 from flask import jsonify, url_for, request, render_template, redirect
 import datetime
 from ..utils import TokenResetPasswordEmail, generate_id, TokenResetPasswordWeb
-from ..config import netpoll_url
+from ..config import job_entry_url
 import re
 from ..task import send_email_task
 
@@ -12,27 +12,27 @@ class ResetPasswordController:
     async def user_account_reset_password_page(token):
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
         if not token:
-            return redirect(f"{netpoll_url}not-found")
+            return redirect(f"{job_entry_url}not-found")
         if not (valid_token := await TokenResetPasswordWeb.get(token)):
-            return redirect(f"{netpoll_url}not-found")
+            return redirect(f"{job_entry_url}not-found")
         if not (
             user := await ResetPasswordDatabase.get(
                 "reset_password", user_id=valid_token["user_id"]
             )
         ):
-            return redirect(f"{netpoll_url}not-found")
+            return redirect(f"{job_entry_url}not-found")
         if user.token_web != token:
-            return redirect(f"{netpoll_url}not-found")
+            return redirect(f"{job_entry_url}not-found")
         if user.expired_at <= int(created_at):
             await ResetPasswordDatabase.delete(
                 "user_id", user_id=valid_token["user_id"]
             )
-            return redirect(f"{netpoll_url}not-found")
+            return redirect(f"{job_entry_url}not-found")
         return render_template(
             "reset_password/reset_password.html",
             user=user.user,
             host_url=request.host_url,
-            netpoll_url=netpoll_url,
+            job_entry_url=job_entry_url,
         )
 
     @staticmethod
@@ -43,20 +43,20 @@ class ResetPasswordController:
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
         if request.method == "GET":
             if not token:
-                return redirect(f"{netpoll_url}not-found")
+                return redirect(f"{job_entry_url}not-found")
             if not (
                 user := await ResetPasswordDatabase.get(
                     "reset_password", user_id=valid_token["user_id"]
                 )
             ):
-                return redirect(f"{netpoll_url}not-found")
+                return redirect(f"{job_entry_url}not-found")
             if user.token_email != token:
-                return redirect(f"{netpoll_url}not-found")
+                return redirect(f"{job_entry_url}not-found")
             if user.expired_at <= int(created_at):
                 await ResetPasswordDatabase.delete(
                     "user_id", user_id=valid_token["user_id"]
                 )
-                return redirect(f"{netpoll_url}not-found")
+                return redirect(f"{job_entry_url}not-found")
             return render_template("reset_password/user_reset_password.html")
         if request.method == "POST":
             form = request.form
@@ -107,7 +107,7 @@ class ResetPasswordController:
                 await ResetPasswordDatabase.delete(
                     "user_id", user_id=valid_token["user_id"]
                 )
-                return redirect(f"{netpoll_url}login")
+                return redirect(f"{job_entry_url}login")
             return render_template(
                 "reset_password/user_reset_password.html",
                 errors=errors["password"],

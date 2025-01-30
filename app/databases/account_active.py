@@ -1,6 +1,6 @@
 from .database import Database
 from ..models import AccountActiveModel, UserModel
-from ..utils import DataNotFoundError
+import datetime
 from ..database import db
 
 
@@ -74,6 +74,7 @@ class AccountActiveDatabase(Database):
         if category == "user_active":
             if user := UserModel.query.filter(UserModel.user_id == user_id).first():
                 user.is_active = True
+                user.updated_at = updated_at
                 db.session.commit()
                 if token := AccountActiveModel.query.filter(
                     AccountActiveModel.user_id == user_id
