@@ -1,8 +1,7 @@
-from flask import jsonify, render_template, redirect, url_for, request
+from flask import jsonify, url_for
 import datetime
 from ..databases import AccountActiveDatabase, UserDatabase
 from ..utils import TokenAccountActiveEmail, TokenAccountActiveWeb, generate_id
-from ..config import job_entry_url
 from ..task import send_email_task
 
 
