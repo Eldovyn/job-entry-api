@@ -1,6 +1,7 @@
-from flask import Blueprint, request, current_app
+from flask import Blueprint, request
 from ..controllers import UserController
-import os
+import cloudinary
+from ..config import avatar_id
 
 register_router = Blueprint("register_router", __name__)
 user_controller = UserController()
@@ -12,5 +13,5 @@ async def user_register():
     email = data.get("email", "")
     username = data.get("username", "")
     password = data.get("password", "")
-    avatar = os.path.join(current_app.root_path, "static/image/avatar.jpg")
+    avatar = cloudinary.CloudinaryImage(avatar_id).public_id
     return await UserController().user_register(email, username, password, avatar)

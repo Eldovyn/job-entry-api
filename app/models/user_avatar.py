@@ -9,17 +9,17 @@ class UserAvatarModel(db.Model):
 
     avatar_id = Column(String, primary_key=True)
     user_id = Column(String, ForeignKey("users.user_id", ondelete="CASCADE"))
+    avatar = Column(String, nullable=False)
     created_at = Column(Integer, nullable=False)
     updated_at = Column(Integer, nullable=False)
-    avatar = Column(String, nullable=False)
     user = relationship("UserModel", back_populates="user_avatar")
 
-    def __init__(self, avatar_id, user_id, avatar):
+    def __init__(self, avatar, avatar_id, user_id):
         self.avatar_id = avatar_id
+        self.avatar = avatar
         self.user_id = user_id
         self.created_at = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
         self.updated_at = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
-        self.avatar = avatar
 
     def __repr__(self):
-        return f"<TokenBlocklist {self.jti!r}>"
+        return f"<UserAvatar {self.avatar_id!r}>"

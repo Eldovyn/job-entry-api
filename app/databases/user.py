@@ -12,7 +12,7 @@ class UserDatabase(Database):
             password=password,
             user_id=user_id,
         )
-        avatar = UserAvatarModel(user_id=user_id, avatar=avatar, avatar_id=avatar_id)
+        avatar = UserAvatarModel(user_id=user_id, avatar_id=avatar_id, avatar=avatar)
         db.session.add(user)
         db.session.add(avatar)
         db.session.commit()
