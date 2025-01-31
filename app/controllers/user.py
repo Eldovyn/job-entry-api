@@ -1,10 +1,12 @@
-from ..databases import UserDatabase, TokenBlacklistDatabase
+from ..databases import UserDatabase, TokenBlacklistDatabase, AccountActiveDatabase
 from flask import jsonify, url_for
 import sqlalchemy
 from flask_jwt_extended import create_access_token
 import re
-from ..utils import generate_id
 import datetime
+from ..utils import TokenAccountActiveEmail, TokenAccountActiveWeb, generate_id
+from ..task import send_email_task
+from ..config import job_entry_url
 
 
 class UserController:
@@ -318,9 +320,10 @@ class UserController:
         result_password = bcrypt.generate_password_hash(password).decode("utf-8")
         user_id = generate_id()
         avatar_id = generate_id()
+        created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
         try:
             user = await UserDatabase.insert(
-                user_id, email, username, result_password, avatar_id, avatar
+                user_id, email, username, result_password, avatar_id, avatar, created_at
             )
         except sqlalchemy.exc.IntegrityError:
             return (
@@ -332,6 +335,47 @@ class UserController:
                 ),
                 409,
             )
+        expired_at = created_at + 300
+        email_token = await TokenAccountActiveEmail.insert(
+            f"{user.user_id}", int(created_at)
+        )
+        web_token = await TokenAccountActiveWeb.insert(
+            f"{user.user_id}", int(created_at)
+        )
+        user_token = await AccountActiveDatabase.insert(
+            generate_id(),
+            f"{user.user_id}",
+            email_token,
+            web_token,
+            int(expired_at),
+            created_at,
+        )
+        send_email_task.apply_async(
+            args=[
+                "Account Active",
+                [user.email],
+                f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset</title>
+</head>
+<body>
+    <p>Hello {user.username},</p>
+    <p>Someone has requested a link to verify your account, and you can do this through the link below.</p>
+    <p>
+        <a href="{job_entry_url}/account-active/{email_token}">
+            Click here to activate your account
+        </a>
+    </p>
+    <p>If you didn't request this, please ignore this email.</p>
+</body>
+</html>
+                """,
+                "account active",
+            ],
+        )
         return (
             jsonify(
                 {
@@ -343,6 +387,11 @@ class UserController:
                         "updated_at": user.updated_at,
                         "user_id": user.user_id,
                         "created_at": user.created_at,
+                    },
+                    "verification": {
+                        "token": user_token.token_web,
+                        "created_at": user_token.created_at,
+                        "updated_at": user_token.updated_at,
                     },
                 }
             ),

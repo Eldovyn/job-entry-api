@@ -28,13 +28,13 @@ class UserModel(db.Model):
     user_avatar = relationship("UserAvatarModel", uselist=False, back_populates="user")
     is_admin = Column(Boolean, nullable=False, default=False)
 
-    def __init__(self, user_id, username, email, password):
+    def __init__(self, user_id, username, email, password, created_at):
         self.user_id = user_id
         self.username = username
         self.email = email
         self.password = password
-        self.created_at = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
-        self.updated_at = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+        self.created_at = created_at
+        self.updated_at = created_at
 
     def __repr__(self):
         return f"<User {self.username!r}>"

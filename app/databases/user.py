@@ -5,12 +5,13 @@ from ..database import db
 
 class UserDatabase(Database):
     @staticmethod
-    async def insert(user_id, email, username, password, avatar_id, avatar):
+    async def insert(user_id, email, username, password, avatar_id, avatar, created_at):
         user = UserModel(
             email=email,
             username=username,
             password=password,
             user_id=user_id,
+            created_at=created_at,
         )
         avatar = UserAvatarModel(user_id=user_id, avatar_id=avatar_id, avatar=avatar)
         db.session.add(user)
