@@ -224,7 +224,49 @@ class UserController:
                 jsonify({"message": "authorization invalid", "data": {"email": email}}),
                 401,
             )
+        created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
         if not user.is_active:
+            expired_at = created_at + 300
+            email_token = await TokenAccountActiveEmail.insert(
+                f"{user.user_id}", int(created_at)
+            )
+            web_token = await TokenAccountActiveWeb.insert(
+                f"{user.user_id}", int(created_at)
+            )
+            user_token = await AccountActiveDatabase.insert(
+                generate_id(),
+                f"{user.user_id}",
+                email_token,
+                web_token,
+                int(expired_at),
+                created_at,
+            )
+            send_email_task.apply_async(
+                args=[
+                    "Account Active",
+                    [user.email],
+                    f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset</title>
+</head>
+<body>
+    <p>Hello {user.username},</p>
+    <p>Someone has requested a link to verify your account, and you can do this through the link below.</p>
+    <p>
+        <a href="{job_entry_url}/account-active?token={email_token}">
+            Click here to activate your account
+        </a>
+    </p>
+    <p>If you didn't request this, please ignore this email.</p>
+</body>
+</html>
+                    """,
+                    "account active",
+                ],
+            )
             return (
                 jsonify(
                     {
@@ -234,6 +276,11 @@ class UserController:
                             "username": user.username,
                             "email": user.email,
                             "is_active": user.is_active,
+                        },
+                        "verification": {
+                            "token": user_token.token_web,
+                            "created_at": user_token.created_at,
+                            "updated_at": user_token.updated_at,
                         },
                     }
                 ),
@@ -250,7 +297,6 @@ class UserController:
                         "email": user.email,
                         "access_token": access_token,
                         "is_active": user.is_active,
-                        "avatar": f'{url_for("image_router.get_avatar", user_id=user.user_id, avatar_id=user.user_avatar.avatar_id, _external=True)}',
                     },
                 }
             ),
@@ -365,7 +411,7 @@ class UserController:
     <p>Hello {user.username},</p>
     <p>Someone has requested a link to verify your account, and you can do this through the link below.</p>
     <p>
-        <a href="{job_entry_url}/account-active/{email_token}">
+        <a href="{job_entry_url}/account-active?token={email_token}">
             Click here to activate your account
         </a>
     </p>

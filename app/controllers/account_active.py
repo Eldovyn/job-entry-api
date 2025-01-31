@@ -3,6 +3,7 @@ import datetime
 from ..databases import AccountActiveDatabase, UserDatabase
 from ..utils import TokenAccountActiveEmail, TokenAccountActiveWeb, generate_id
 from ..task import send_email_task
+from ..config import job_entry_url
 
 
 class AccountActiveController:
@@ -124,7 +125,7 @@ class AccountActiveController:
     <p>Hello {user.username},</p>
     <p>Someone has requested a link to verify your account, and you can do this through the link below.</p>
     <p>
-        <a href="{url_for('account_active_router.account_active_email_verification', token=email_token, _external=True)}">
+        <a href="{job_entry_url}/account-active?token={email_token}">
             Click here to activate your account
         </a>
     </p>
