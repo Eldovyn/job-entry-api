@@ -79,7 +79,7 @@ def create_app():
                 if item2.expired_at <= expired_at:
                     db.session.delete(item2)
                     db.session.commit()
-                    return f"success delete token user {item2.user.username}"
+        return f"delete token at {int(datetime.datetime.now(datetime.timezone.utc).timestamp())}"
 
     celery_app.conf.beat_schedule = {
         "run-every-5-minutes": {
