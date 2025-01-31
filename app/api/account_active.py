@@ -5,13 +5,6 @@ account_active_router = Blueprint("account_active_router", __name__)
 account_active_controller = AccountActiveController()
 
 
-@account_active_router.post("/job-entry/account-active")
-async def account_active_email():
-    data = request.json
-    email = data.get("email", "")
-    return await account_active_controller.user_account_active(email)
-
-
 @account_active_router.patch("/job-entry/re-send/account-active")
 async def re_send_account_active_email():
     data = request.json
