@@ -26,6 +26,18 @@ async def get_page_user_reset_password():
     return await reset_password_controller.get_page_user_reset_password(token)
 
 
+@reset_password_router.patch("/job-entry/user/reset-password")
+async def user_update_password():
+    params = request.args
+    data = request.json
+    token = params.get("token", "")
+    password = data.get("password", "")
+    confirm_password = data.get("confirm_password", "")
+    return await reset_password_controller.user_update_reset_password(
+        token, password, confirm_password
+    )
+
+
 @reset_password_router.patch("/job-entry/re-send/reset-password")
 async def re_send_user_reset_password():
     data = request.json

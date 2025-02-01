@@ -73,6 +73,7 @@ class ResetPasswordDatabase(Database):
         token_email = kwargs.get("token_email")
         expired_at = kwargs.get("expired_at")
         updated_at = kwargs.get("updated_at")
+        password = kwargs.get("password")
         if category == "user_id":
             if user := UserModel.query.filter(UserModel.user_id == user_id).first():
                 user.is_active = True
@@ -91,5 +92,14 @@ class ResetPasswordDatabase(Database):
                 user_token.token_email = token_email
                 user_token.expired_at = expired_at
                 user_token.updated_at = updated_at
+                db.session.commit()
+                return user_token
+        if category == "update_password":
+            if user_token := ResetPasswordModel.query.filter(
+                ResetPasswordModel.user_id == user_id
+            ).first():
+                user_token.user.password = password
+                user_token.user.updated_at = updated_at
+                db.session.delete(user_token)
                 db.session.commit()
                 return user_token

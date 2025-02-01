@@ -154,6 +154,114 @@ class ResetPasswordController:
         )
 
     @staticmethod
+    async def user_update_reset_password(token, password, confirm_password):
+        from ..bcrypt import bcrypt
+
+        created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
+        errors = {}
+        if len(token.strip()) == 0:
+            errors["token"] = ["token cannot be empty"]
+
+        if len(password.strip()) == 0:
+            errors["password"] = ["password cannot be empty"]
+
+        if len(confirm_password.strip()) == 0:
+            errors["confirm_password"] = ["confirm password cannot be empty"]
+
+        if not errors.get("password") and not errors.get("confirm_password"):
+            if password != confirm_password:
+                errors["password"] = ["password not match"]
+            else:
+                if len(password) < 8:
+                    errors["security_password"] = ["minimum 8 characters"]
+                if not re.search("[a-z]", password):
+                    errors.setdefault("security_password", []).append(
+                        "password must contain lowercase"
+                    )
+                if not re.search("[A-Z]", password):
+                    errors.setdefault("security_password", []).append(
+                        "password must contain uppercase"
+                    )
+                if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+                    errors.setdefault("security_password", []).append(
+                        "password must contain special character(s)"
+                    )
+                if not re.search(r"\d", password):
+                    errors.setdefault("security_password", []).append(
+                        "password must contain number"
+                    )
+        if errors:
+            return jsonify({"message": "input invalid", "errors": errors}), 400
+        result_password = bcrypt.generate_password_hash(password).decode("utf-8")
+        valid_token = await TokenResetPasswordEmail.get(token)
+        if not valid_token:
+            return (
+                jsonify(
+                    {
+                        "message": "token not found",
+                    }
+                ),
+                404,
+            )
+        if not (
+            user := await UserDatabase.get("user_id", user_id=valid_token["user_id"])
+        ):
+            return (
+                jsonify(
+                    {
+                        "message": "user not found",
+                    }
+                ),
+                404,
+            )
+        if not (
+            user_token := await ResetPasswordDatabase.get(
+                "reset_password_email",
+                user_id=valid_token["user_id"],
+                email_token=token,
+            )
+        ):
+            return (
+                jsonify(
+                    {
+                        "message": "token not found",
+                    }
+                ),
+                404,
+            )
+        if user_token.expired_at <= int(created_at):
+            await ResetPasswordDatabase.delete(
+                "user_id", user_id=valid_token["user_id"]
+            )
+            return (
+                jsonify(
+                    {
+                        "message": "token not found",
+                    }
+                ),
+                404,
+            )
+        await ResetPasswordDatabase.update(
+            "update_password",
+            user_id=valid_token["user_id"],
+            updated_at=created_at,
+            password=result_password,
+        )
+        return (
+            jsonify(
+                {
+                    "message": "success update password",
+                    "data": {
+                        "user_id": user.user_id,
+                        "email": user.email,
+                        "username": user.username,
+                    },
+                }
+            ),
+            201,
+        )
+
+    @staticmethod
     async def get_user_reset_password(token):
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
         if len(token.strip()) == 0:
