@@ -1,5 +1,5 @@
 from ..databases import UserDatabase, TokenBlacklistDatabase, AccountActiveDatabase
-from flask import jsonify, url_for
+from flask import jsonify
 import sqlalchemy
 from flask_jwt_extended import create_access_token
 import re
@@ -12,6 +12,7 @@ from ..utils import (
 )
 from ..task import send_email_task
 from ..config import job_entry_url
+import cloudinary
 
 
 class UserController:
@@ -188,6 +189,7 @@ class UserController:
                 jsonify({"message": "authorization invalid"}),
                 401,
             )
+        avatar_url = cloudinary.CloudinaryImage(user.user_avatar.avatar).url
         return (
             jsonify(
                 {
@@ -197,7 +199,10 @@ class UserController:
                         "username": user.username,
                         "email": user.email,
                         "is_active": user.is_active,
-                        "avatar": user.user_avatar.avatar,
+                        "is_admin": user.is_admin,
+                        "avatar": avatar_url,
+                        "created_at": user.created_at,
+                        "updated_at": user.updated_at,
                     },
                 }
             ),
