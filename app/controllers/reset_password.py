@@ -262,7 +262,7 @@ class ResetPasswordController:
             )
         send_email_task.apply_async(
             args=[
-                "Reset Password Netpoll",
+                "Reset Password",
                 [user.email],
                 f"""<!DOCTYPE html>
 <html lang="en">
