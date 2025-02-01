@@ -170,10 +170,12 @@ class ResetPasswordController:
 
         if not errors.get("password") and not errors.get("confirm_password"):
             if password != confirm_password:
-                errors["password"] = ["password not match"]
+                errors["security_password"] = ["password not match"]
             else:
                 if len(password) < 8:
-                    errors["security_password"] = ["minimum 8 characters"]
+                    errors.setdefault("security_password", []).append(
+                        "minimum 8 characters"
+                    )
                 if not re.search("[a-z]", password):
                     errors.setdefault("security_password", []).append(
                         "password must contain lowercase"
