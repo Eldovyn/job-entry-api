@@ -4,7 +4,12 @@ import sqlalchemy
 from flask_jwt_extended import create_access_token
 import re
 import datetime
-from ..utils import TokenAccountActiveEmail, TokenAccountActiveWeb, generate_id
+from ..utils import (
+    TokenAccountActiveEmail,
+    TokenAccountActiveWeb,
+    generate_id,
+    Validation,
+)
 from ..task import send_email_task
 from ..config import job_entry_url
 
@@ -215,6 +220,11 @@ class UserController:
             errors["email"] = ["email cannot be empty"]
         if len(password.strip()) == 0:
             errors["password"] = ["password cannot be empty"]
+        if not (email_valid := await Validation.validate_email(email)):
+            if "email" in errors:
+                errors["email"].append("email not valid")
+            else:
+                errors["email"] = ["email not valid"]
         if errors:
             return jsonify({"message": "input invalid", "errors": errors}), 400
         if not (user := await UserDatabase.get("email", email=email)):
@@ -353,6 +363,11 @@ class UserController:
                 errors["email"].append("email must be less than 50 characters")
             else:
                 errors["email"] = ["email must be less than 50 characters"]
+        if not (email_valid := await Validation.validate_email(email)):
+            if "email" in errors:
+                errors["email"].append("email not valid")
+            else:
+                errors["email"] = ["email not valid"]
         if errors:
             return (
                 jsonify(

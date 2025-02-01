@@ -1,7 +1,12 @@
 from ..databases import ResetPasswordDatabase, UserDatabase
 from flask import jsonify, url_for, request, render_template, redirect
 import datetime
-from ..utils import TokenResetPasswordEmail, generate_id, TokenResetPasswordWeb
+from ..utils import (
+    TokenResetPasswordEmail,
+    generate_id,
+    TokenResetPasswordWeb,
+    Validation,
+)
 from ..config import job_entry_url
 import re
 from ..task import send_email_task
@@ -118,16 +123,16 @@ class ResetPasswordController:
 
     @staticmethod
     async def re_send_user_reset_password(email):
+        errors = {}
         if len(email.strip()) == 0:
-            return (
-                jsonify(
-                    {
-                        "message": "input invalid",
-                        "errors": {"email": ["email cannot be empty"]},
-                    }
-                ),
-                400,
-            )
+            errors["email"] = ["email cannot be empty"]
+        if not (email_valid := await Validation.validate_email(email)):
+            if "email" in errors:
+                errors["email"].append("email not valid")
+            else:
+                errors["email"] = ["email not valid"]
+        if errors:
+            return jsonify({"message": "input invalid", "errors": errors}), 400
         if not (user := await UserDatabase.get("email", email=email)):
             return (
                 jsonify({"message": "email not found"}),
@@ -179,7 +184,7 @@ class ResetPasswordController:
     <p>Hello {user.username},</p>
     <p>Someone has requested a link to change your password, and you can do this through the link below.</p>
     <p>
-        <a href="{url_for('reset_password_router.link_reset_password', token=token_email, _external=True)}">
+        <a href="{job_entry_url}/reset-password?token={token_email}">
             Click here to reset your password
         </a>
     </p>
@@ -209,19 +214,19 @@ class ResetPasswordController:
 
     @staticmethod
     async def user_reset_password(email):
+        errors = {}
         if len(email.strip()) == 0:
-            return (
-                jsonify(
-                    {
-                        "message": "input invalid",
-                        "errors": {"email": ["email cannot be empty"]},
-                    }
-                ),
-                400,
-            )
+            errors["email"] = ["email cannot be empty"]
+        if not (email_valid := await Validation.validate_email(email)):
+            if "email" in errors:
+                errors["email"].append("email not valid")
+            else:
+                errors["email"] = ["email not valid"]
+        if errors:
+            return jsonify({"message": "input invalid", "errors": errors}), 400
         if not (user := await UserDatabase.get("email", email=email)):
             return (
-                jsonify({"message": "email not found"}),
+                jsonify({"message": "user not found"}),
                 404,
             )
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
@@ -243,7 +248,7 @@ class ResetPasswordController:
             )
         ):
             return (
-                jsonify({"message": "email not found"}),
+                jsonify({"message": "user not found"}),
                 404,
             )
         send_email_task.apply_async(
@@ -261,7 +266,7 @@ class ResetPasswordController:
     <p>Hello {user.username},</p>
     <p>Someone has requested a link to change your password, and you can do this through the link below.</p>
     <p>
-        <a href="{url_for('reset_password_router.link_reset_password', token=token_email, _external=True)}">
+        <a href="{job_entry_url}/reset-password?token={token_email}">
             Click here to reset your password
         </a>
     </p>
@@ -282,7 +287,11 @@ class ResetPasswordController:
                         "username": user.username,
                         "email": user.email,
                         "is_active": user.is_active,
-                        "token": token_web,
+                    },
+                    "reset-password": {
+                        "token": user_token.token_web,
+                        "created_at": user_token.created_at,
+                        "updated_at": user_token.updated_at,
                     },
                 }
             ),
