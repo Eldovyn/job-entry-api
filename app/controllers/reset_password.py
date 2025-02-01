@@ -14,112 +14,47 @@ from ..task import send_email_task
 
 class ResetPasswordController:
     @staticmethod
-    async def user_account_reset_password_page(token):
+    async def get_page_user_reset_password(token):
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
-        if not token:
-            return redirect(f"{job_entry_url}not-found")
+        if len(token.strip()) == 0:
+            return (
+                jsonify(
+                    {
+                        "message": "token cannot be empty",
+                        "errors": {"token": ["token cannot be empty"]},
+                    }
+                ),
+                400,
+            )
         if not (valid_token := await TokenResetPasswordWeb.get(token)):
-            return redirect(f"{job_entry_url}not-found")
+            return jsonify({"message": "token not found"}), 404
         if not (
-            user := await ResetPasswordDatabase.get(
-                "reset_password", user_id=valid_token["user_id"]
+            user_token := await ResetPasswordDatabase.get(
+                "reset_password_web", user_id=valid_token["user_id"], web_token=token
             )
         ):
-            return redirect(f"{job_entry_url}not-found")
-        if user.token_web != token:
-            return redirect(f"{job_entry_url}not-found")
-        if user.expired_at <= int(created_at):
+            return jsonify({"message": "token not found"}), 404
+        if user_token.token_web != token:
+            return jsonify({"message": "token not found"}), 404
+        if user_token.expired_at <= int(created_at):
             await ResetPasswordDatabase.delete(
                 "user_id", user_id=valid_token["user_id"]
             )
-            return redirect(f"{job_entry_url}not-found")
-        return render_template(
-            "reset_password/reset_password.html",
-            user=user.user,
-            host_url=request.host_url,
-            job_entry_url=job_entry_url,
+            return jsonify({"message": "token not found"}), 404
+        return (
+            jsonify(
+                {
+                    "message": "success get user token",
+                    "data": {
+                        "token": token,
+                        "user_id": user_token.user.user_id,
+                        "email": user_token.user.email,
+                        "username": user_token.user.username,
+                    },
+                }
+            ),
+            200,
         )
-
-    @staticmethod
-    async def link_reset_password(token):
-        from ..bcrypt import bcrypt
-
-        valid_token = await TokenResetPasswordEmail.get(token)
-        created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
-        if request.method == "GET":
-            if not token:
-                return redirect(f"{job_entry_url}not-found")
-            if not (
-                user := await ResetPasswordDatabase.get(
-                    "reset_password", user_id=valid_token["user_id"]
-                )
-            ):
-                return redirect(f"{job_entry_url}not-found")
-            if user.token_email != token:
-                return redirect(f"{job_entry_url}not-found")
-            if user.expired_at <= int(created_at):
-                await ResetPasswordDatabase.delete(
-                    "user_id", user_id=valid_token["user_id"]
-                )
-                return redirect(f"{job_entry_url}not-found")
-            return render_template("reset_password/user_reset_password.html")
-        if request.method == "POST":
-            form = request.form
-            password = form.get("password")
-            confirm_password = form.get("confirmPassword")
-            errors = {}
-            if len(password.strip()) == 0:
-                if "password" in errors:
-                    errors["password"].append("password cant be empety")
-                else:
-                    errors["password"] = ["password cant be empety"]
-            if len(password) < 8:
-                if "password" in errors:
-                    errors["password"].append("minimum 8 characters")
-                else:
-                    errors["password"] = ["minimum 8 characters"]
-            if not re.search("[a-z]", password):
-                if "password" in errors:
-                    errors["password"].append("password must contain lowercase")
-                else:
-                    errors["password"] = ["password must contain lowercase"]
-            if not re.search("[A-Z]", password):
-                if "password" in errors:
-                    errors["password"].append("password must contain uppercase")
-                else:
-                    errors["password"] = ["password must contain uppercase"]
-            if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-                if "password" in errors:
-                    errors["password"].append("password contains special character(s)")
-                else:
-                    errors["password"] = ["password contains special character(s)"]
-            if password != confirm_password:
-                if "password" in errors:
-                    errors["password"].append("passwords do not match")
-                else:
-                    errors["password"] = ["passwords do not match"]
-            if not errors:
-                created_at = int(
-                    datetime.datetime.now(datetime.timezone.utc).timestamp()
-                )
-                password = bcrypt.generate_password_hash(password).decode("utf-8")
-                await UserDatabase.update(
-                    "password",
-                    new_password=password,
-                    user_id=valid_token["user_id"],
-                    created_at=created_at,
-                )
-                await ResetPasswordDatabase.delete(
-                    "user_id", user_id=valid_token["user_id"]
-                )
-                return redirect(f"{job_entry_url}login")
-            return render_template(
-                "reset_password/user_reset_password.html",
-                errors=errors["password"],
-                password=password,
-                confirm_password=confirm_password,
-                user_token=token,
-            )
 
     @staticmethod
     async def re_send_user_reset_password(email):
@@ -135,7 +70,7 @@ class ResetPasswordController:
             return jsonify({"message": "input invalid", "errors": errors}), 400
         if not (user := await UserDatabase.get("email", email=email)):
             return (
-                jsonify({"message": "email not found"}),
+                jsonify({"message": "user not found"}),
                 404,
             )
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
@@ -171,7 +106,7 @@ class ResetPasswordController:
         )
         send_email_task.apply_async(
             args=[
-                "Reset Password Netpoll",
+                "Reset Password",
                 [user.email],
                 f"""<!DOCTYPE html>
 <html lang="en">
@@ -205,11 +140,83 @@ class ResetPasswordController:
                         "username": user.username,
                         "email": user.email,
                         "is_active": user.is_active,
-                        "token": token_web,
+                    },
+                    "reset_password": {
+                        "token": user_token.token_web,
+                        "created_at": user_token.created_at,
+                        "updated_at": user_token.updated_at,
                     },
                 }
             ),
             201,
+        )
+
+    @staticmethod
+    async def get_user_reset_password(token):
+        created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
+        if len(token.strip()) == 0:
+            return (
+                jsonify(
+                    {
+                        "message": "token cannot be empty",
+                        "errors": {"token": ["token cannot be empty"]},
+                    }
+                ),
+                400,
+            )
+        valid_token = await TokenResetPasswordEmail.get(token)
+        if not valid_token:
+            return (
+                jsonify(
+                    {
+                        "message": "token not found",
+                    }
+                ),
+                404,
+            )
+        if not (
+            user_token := await ResetPasswordDatabase.get(
+                "reset_password_email",
+                user_id=valid_token["user_id"],
+                email_token=token,
+            )
+        ):
+            return (
+                jsonify(
+                    {
+                        "message": "token not found",
+                    }
+                ),
+                404,
+            )
+        if user_token.expired_at <= int(created_at):
+            await ResetPasswordDatabase.delete(
+                "user_id", user_id=valid_token["user_id"]
+            )
+            return (
+                jsonify(
+                    {
+                        "message": "token not found",
+                    }
+                ),
+                404,
+            )
+        await ResetPasswordDatabase.update(
+            "user_active", user_id=valid_token["user_id"], updated_at=created_at
+        )
+        return (
+            jsonify(
+                {
+                    "message": "success get user token",
+                    "data": {
+                        "token": token,
+                        "user_id": user_token.user.user_id,
+                        "email": user_token.user.email,
+                        "username": user_token.user.username,
+                    },
+                }
+            ),
+            200,
         )
 
     @staticmethod
@@ -288,7 +295,7 @@ class ResetPasswordController:
                         "email": user.email,
                         "is_active": user.is_active,
                     },
-                    "reset-password": {
+                    "reset_password": {
                         "token": user_token.token_web,
                         "created_at": user_token.created_at,
                         "updated_at": user_token.updated_at,

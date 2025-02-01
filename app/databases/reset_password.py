@@ -46,6 +46,11 @@ class ResetPasswordDatabase(Database):
                 ResetPasswordModel.token_email == email_token,
                 ResetPasswordModel.user_id == user_id,
             ).first()
+        if category == "reset_password_web":
+            return ResetPasswordModel.query.filter(
+                ResetPasswordModel.token_web == web_token,
+                ResetPasswordModel.user_id == user_id,
+            ).first()
         if category == "token_active":
             return ResetPasswordModel.query.filter(
                 ResetPasswordModel.user_id == user_id,
