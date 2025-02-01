@@ -140,6 +140,8 @@ class ResetPasswordController:
                         "username": user.username,
                         "email": user.email,
                         "is_active": user.is_active,
+                        "created_at": user.created_at,
+                        "updated_at": user.updated_at,
                     },
                     "reset_password": {
                         "token": user_token.token_web,
@@ -294,6 +296,8 @@ class ResetPasswordController:
                         "username": user.username,
                         "email": user.email,
                         "is_active": user.is_active,
+                        "created_at": user.created_at,
+                        "updated_at": user.updated_at,
                     },
                     "reset_password": {
                         "token": user_token.token_web,
