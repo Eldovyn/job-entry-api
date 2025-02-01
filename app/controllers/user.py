@@ -451,7 +451,7 @@ class UserController:
                         "user_id": user.user_id,
                         "created_at": user.created_at,
                     },
-                    "verification": {
+                    "account_active": {
                         "token": user_token.token_web,
                         "created_at": user_token.created_at,
                         "updated_at": user_token.updated_at,
