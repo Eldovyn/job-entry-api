@@ -316,7 +316,7 @@ class UserController:
         )
 
     @staticmethod
-    async def user_register(email, username, password, avatar):
+    async def user_register(email, username, password, confirm_password, avatar):
         from ..bcrypt import bcrypt
 
         errors = {}
@@ -335,41 +335,42 @@ class UserController:
                 errors["password"].append("password cant be empety")
             else:
                 errors["password"] = ["password cant be empety"]
-        if len(password) < 8:
-            if "password" in errors:
-                errors["password"].append("minimum 8 characters")
-            else:
-                errors["password"] = ["minimum 8 characters"]
-        if not re.search("[a-z]", password):
-            if "password" in errors:
-                errors["password"].append("password must contain lowercase")
-            else:
-                errors["password"] = ["password must contain lowercase"]
-        if not re.search("[A-Z]", password):
-            if "password" in errors:
-                errors["password"].append("password must contain uppercase")
-            else:
-                errors["password"] = ["password must contain uppercase"]
-        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-            if "password" in errors:
-                errors["password"].append("password contains special character(s)")
-            else:
-                errors["password"] = ["password contains special character(s)"]
-        if len(username) > 20:
-            if "username" in errors:
-                errors["username"].append("username must be less than 20 characters")
-            else:
-                errors["username"] = ["username must be less than 20 characters"]
-        if len(email) > 50:
-            if "email" in errors:
-                errors["email"].append("email must be less than 50 characters")
-            else:
-                errors["email"] = ["email must be less than 50 characters"]
-        if not (email_valid := await Validation.validate_email(email)):
+        if len(email.strip()) > 0 and not (
+            email_valid := await Validation.validate_email(email)
+        ):
             if "email" in errors:
                 errors["email"].append("email not valid")
             else:
                 errors["email"] = ["email not valid"]
+        if len(password.strip()) == 0:
+            errors["password"] = ["password cannot be empty"]
+        if len(confirm_password.strip()) == 0:
+            errors["confirm_password"] = ["confirm password cannot be empty"]
+
+        if not errors.get("password") and not errors.get("confirm_password"):
+            if password != confirm_password:
+                errors["security_password"] = ["password not match"]
+            else:
+                if len(password) < 8:
+                    errors.setdefault("security_password", []).append(
+                        "minimum 8 characters"
+                    )
+                if not re.search("[a-z]", password):
+                    errors.setdefault("security_password", []).append(
+                        "password must contain lowercase"
+                    )
+                if not re.search("[A-Z]", password):
+                    errors.setdefault("security_password", []).append(
+                        "password must contain uppercase"
+                    )
+                if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+                    errors.setdefault("security_password", []).append(
+                        "password must contain special character(s)"
+                    )
+                if not re.search(r"\d", password):
+                    errors.setdefault("security_password", []).append(
+                        "password must contain number"
+                    )
         if errors:
             return (
                 jsonify(
