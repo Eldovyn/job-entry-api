@@ -37,9 +37,23 @@ class UserDatabase(Database):
         user_id = kwargs.get("user_id")
         new_password = kwargs.get("new_password")
         created_at = kwargs.get("created_at")
+        new_email = kwargs.get("new_email")
+        new_username = kwargs.get("new_username")
         if category == "password":
             if user := UserModel.query.filter(UserModel.user_id == user_id).first():
                 user.password = new_password
+                user.updated_at = created_at
+                db.session.commit()
+                return user
+        if category == "email":
+            if user := UserModel.query.filter(UserModel.user_id == user_id).first():
+                user.email = new_email
+                user.updated_at = created_at
+                db.session.commit()
+                return user
+        if category == "username":
+            if user := UserModel.query.filter(UserModel.user_id == user_id).first():
+                user.username = new_username
                 user.updated_at = created_at
                 db.session.commit()
                 return user

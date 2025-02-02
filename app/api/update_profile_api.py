@@ -1,46 +1,30 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from ..controllers import UserController
+from ..controllers import UpdateProfileController
 
 update_profile_router = Blueprint("update_profile_router", __name__)
-user_controller = UserController()
+user_update_profile_controller = UpdateProfileController()
 
 
-@update_profile_router.patch("/job-entry/password")
-@jwt_required()
-async def update_password():
-    current_user = get_jwt_identity()
-    data = request.json
-    password = data.get("password")
-    confirm_password = data.get("confirm_password")
-    return await user_controller.update_password(
-        current_user, password, confirm_password
-    )
-
-
-@update_profile_router.patch("/job-entry/profile")
-@jwt_required()
-async def update_profiles():
-    current_user = get_jwt_identity()
-    data = request.json
-    new_email = data.get("new_email")
-    new_username = data.get("new_username")
-    return await user_controller.update_user(current_user, new_username, new_email)
-
-
-@update_profile_router.patch("/job-entry/profile/email")
+@update_profile_router.patch("/job-entry/update/email")
 @jwt_required()
 async def update_email():
     current_user = get_jwt_identity()
     data = request.json
-    new_email = data.get("new_email")
-    return await user_controller.update_user_email(current_user, new_email)
+    email = data.get("email")
+    confirm_email = data.get("confirm_email")
+    return await user_update_profile_controller.update_user_email(
+        current_user, email, confirm_email
+    )
 
 
-@update_profile_router.patch("/job-entry/profile/username")
+@update_profile_router.patch("/job-entry/update/username")
 @jwt_required()
 async def update_username():
     current_user = get_jwt_identity()
     data = request.json
-    new_username = data.get("new_username")
-    return await user_controller.update_user_username(current_user, new_username)
+    username = data.get("username")
+    confirm_username = data.get("confirm_username")
+    return await user_update_profile_controller.update_user_username(
+        current_user, username, confirm_username
+    )
