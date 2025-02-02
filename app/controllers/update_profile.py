@@ -46,10 +46,8 @@ class UpdateProfileController:
                     "data": {
                         "user_id": user.user_id,
                         "username": user.username,
-                        "old_email": email,
-                        "new_email": user_email.email,
+                        "email": user_email.email,
                         "is_active": user.is_active,
-                        "is_admin": user.is_admin,
                         "avatar": avatar_url,
                         "created_at": user.created_at,
                         "updated_at": user.updated_at,
