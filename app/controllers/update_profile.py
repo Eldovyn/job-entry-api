@@ -20,9 +20,9 @@ class UpdateProfileController:
         else:
             _, ext = os.path.splitext(avatar.filename)
             if ext not in valid_image_extensions:
-                errors["avatar"] = ["avatar only accept jpeg/png/jpg"]
+                errors["security_avatar"] = ["avatar only accept jpeg/png/jpg"]
             if len(avatar.read()) > MAX_FILE_SIZE:
-                errors.setdefault("avatar_security", []).append("avatar too large")
+                errors.setdefault("security_avatar", []).append("avatar too large")
         if errors:
             return jsonify({"message": "input invalid", "errors": errors}), 400
         if not (user := await UserDatabase.get("user_id", user_id=user_id)):
