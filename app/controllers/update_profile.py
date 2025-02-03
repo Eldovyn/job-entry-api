@@ -15,28 +15,39 @@ class UpdateProfileController:
         valid_image_extensions = [".jpg", ".jpeg", ".png"]
         MAX_FILE_SIZE = 500 * 1024
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
+
         if not isinstance(avatar, FileStorage):
             errors["avatar"] = ["avatar must be a file"]
         else:
             _, ext = os.path.splitext(avatar.filename)
-            if ext not in valid_image_extensions:
+
+            if ext.lower() not in valid_image_extensions:
                 errors["security_avatar"] = ["avatar only accept jpeg/png/jpg"]
-            if len(avatar.read()) > MAX_FILE_SIZE:
+
+            avatar_content = avatar.read()
+            if len(avatar_content) > MAX_FILE_SIZE:
                 errors.setdefault("security_avatar", []).append("avatar too large")
+
+            if len(avatar_content) == 0:
+                errors.setdefault("security_avatar", []).append("avatar file is empty")
+
+            avatar.seek(0)
+
         if errors:
             return jsonify({"message": "input invalid", "errors": errors}), 400
+
         if not (user := await UserDatabase.get("user_id", user_id=user_id)):
-            return (
-                jsonify({"message": "authorization invalid"}),
-                401,
-            )
+            return jsonify({"message": "authorization invalid"}), 401
+
         result = cloudinary.uploader.upload(avatar, folder="avatars/")
+
         user_avatar = await UserDatabase.update(
             "avatar",
             user_id=user_id,
             new_avatar=result["public_id"],
             created_at=created_at,
         )
+
         return (
             jsonify(
                 {
