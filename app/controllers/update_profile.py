@@ -3,9 +3,58 @@ from ..utils import Validation
 from ..databases import UserDatabase
 import datetime
 import cloudinary
+import cloudinary.uploader
+import os
+from werkzeug.datastructures import FileStorage
 
 
 class UpdateProfileController:
+    @staticmethod
+    async def update_user_avatar(user_id, avatar):
+        errors = {}
+        valid_image_extensions = [".jpg", ".jpeg", ".png"]
+        MAX_FILE_SIZE = 5 * 1024
+        created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
+        if not isinstance(avatar, FileStorage):
+            errors["avatar"] = ["avatar must be a file"]
+        else:
+            _, ext = os.path.splitext(avatar.filename)
+            if ext not in valid_image_extensions:
+                errors["avatar"] = ["avatar only accept jpeg/png/jpg"]
+            if len(avatar.read()) > MAX_FILE_SIZE:
+                errors.setdefault("avatar_security", []).append("avatar too large")
+        if errors:
+            return jsonify({"message": "input invalid", "errors": errors}), 400
+        if not (user := await UserDatabase.get("user_id", user_id=user_id)):
+            return (
+                jsonify({"message": "authorization invalid"}),
+                401,
+            )
+        result = cloudinary.uploader.upload(avatar, folder="avatars/")
+        user_avatar = await UserDatabase.update(
+            "avatar",
+            user_id=user_id,
+            new_avatar=result["public_id"],
+            created_at=created_at,
+        )
+        return (
+            jsonify(
+                {
+                    "message": "success update avatar",
+                    "data": {
+                        "user_id": user_avatar.user.user_id,
+                        "username": user_avatar.user.username,
+                        "email": user_avatar.user.email,
+                        "is_active": user_avatar.user.is_active,
+                        "avatar": result["secure_url"],
+                        "created_at": user_avatar.user.created_at,
+                        "updated_at": user_avatar.user.updated_at,
+                    },
+                }
+            ),
+            201,
+        )
+
     @staticmethod
     async def update_user_email(user_id, email, confirm_email):
         errors = {}

@@ -28,3 +28,12 @@ async def update_username():
     return await user_update_profile_controller.update_user_username(
         current_user, username, confirm_username
     )
+
+
+@update_profile_router.patch("/job-entry/update/avatar")
+@jwt_required()
+async def update_avatar():
+    current_user = get_jwt_identity()
+    data = request.files
+    avatar = data.get("avatar", "")
+    return await user_update_profile_controller.update_user_avatar(current_user, avatar)
