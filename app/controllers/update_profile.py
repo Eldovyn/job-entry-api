@@ -13,7 +13,7 @@ class UpdateProfileController:
     async def update_user_avatar(user_id, avatar):
         errors = {}
         valid_image_extensions = [".jpg", ".jpeg", ".png"]
-        MAX_FILE_SIZE = 5 * 1024
+        MAX_FILE_SIZE = 500 * 1024
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
         if not isinstance(avatar, FileStorage):
             errors["avatar"] = ["avatar must be a file"]
