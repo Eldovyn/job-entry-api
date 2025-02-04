@@ -6,6 +6,43 @@ from ..utils import generate_id
 
 class BatchFormController:
     @staticmethod
+    async def get_batch_id(user_id, batch_id):
+        errors = {}
+        if len(batch_id.strip()) == 0:
+            errors["batch_id"] = ["batch id cannot be empty"]
+        if errors:
+            return jsonify({"message": "input invalid", "errors": errors}), 400
+        if not (user := await UserDatabase.get("user_id", user_id=user_id)):
+            return (
+                jsonify({"message": "authorization invalid"}),
+                401,
+            )
+        if not user.is_admin:
+            return (
+                jsonify({"message": "authorization invalid"}),
+                401,
+            )
+        if not (batch := await BatchDatabase.get("batch_id", batch_id=batch_id)):
+            return jsonify({"message": "batch not found"}), 404
+        return (
+            jsonify(
+                {
+                    "message": f"success get batch {batch_id!r}",
+                    "data": {
+                        "batch_id": batch.batch_form_id,
+                        "title": batch.title,
+                        "description": batch.description,
+                        "created_at": batch.created_at,
+                        "updated_at": batch.created_at,
+                        "author": batch.user.username,
+                        "is_active": batch.is_active,
+                    },
+                }
+            ),
+            200,
+        )
+
+    @staticmethod
     async def get_all_batch(user_id):
         if not (user := await UserDatabase.get("user_id", user_id=user_id)):
             return (

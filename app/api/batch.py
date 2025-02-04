@@ -21,3 +21,12 @@ async def add_batch():
 async def get_batch():
     current_user = get_jwt_identity()
     return await batch_form_controller.get_all_batch(current_user)
+
+
+@batch_form_router.get("/job-entry/admin/batch/id")
+@jwt_required()
+async def get_batch_id():
+    current_user = get_jwt_identity()
+    data = request.args
+    batch_id = data.get("batch_id", "")
+    return await batch_form_controller.get_batch_id(current_user, batch_id)

@@ -27,8 +27,13 @@ class BatchDatabase(Database):
 
     @staticmethod
     async def get(category, **kwargs):
+        batch_id = kwargs.get("batch_id")
         if category == "all_batch":
             return BatchFormModel.query.all().order_by(BatchFormModel.created_at.desc())
+        if category == "batch_id":
+            return BatchFormModel.query.filter(
+                BatchFormModel.batch_form_id == batch_id
+            ).first()
 
     @staticmethod
     async def delete(category, **kwargs):
