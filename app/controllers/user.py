@@ -74,6 +74,7 @@ class UserController:
                 401,
             )
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
+        avatar_url = cloudinary.CloudinaryImage(user.user_avatar.avatar).url
         if not user.is_active:
             expired_at = created_at + 300
             email_token = await TokenAccountActiveEmail.insert(
@@ -125,6 +126,8 @@ class UserController:
                             "username": user.username,
                             "email": user.email,
                             "is_active": user.is_active,
+                            "is_admin": user.is_admin,
+                            "avatar": avatar_url,
                             "created_at": user.created_at,
                             "updated_at": user.updated_at,
                         },
@@ -146,8 +149,12 @@ class UserController:
                         "user_id": user.user_id,
                         "username": user.username,
                         "email": user.email,
-                        "access_token": access_token,
                         "is_active": user.is_active,
+                        "is_admin": user.is_admin,
+                        "avatar": avatar_url,
+                        "created_at": user.created_at,
+                        "updated_at": user.updated_at,
+                        "access_token": access_token,
                     },
                 }
             ),
