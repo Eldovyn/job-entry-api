@@ -6,6 +6,40 @@ from ..utils import generate_id
 
 class BatchFormController:
     @staticmethod
+    async def get_all_batch(user_id):
+        if not (user := await UserDatabase.get("user_id", user_id=user_id)):
+            return (
+                jsonify({"message": "authorization invalid"}),
+                401,
+            )
+        if not user.is_admin:
+            return (
+                jsonify({"message": "authorization invalid"}),
+                401,
+            )
+        batch = await BatchDatabase.get("all_batch")
+        return (
+            jsonify(
+                {
+                    "message": "success add batch",
+                    "data": [
+                        {
+                            "batch_id": item.batch_form_id,
+                            "title": item.title,
+                            "description": item.description,
+                            "created_at": item.created_at,
+                            "updated_at": item.created_at,
+                            "author": item.user.username,
+                            "is_active": item.is_active,
+                        }
+                        for item in batch
+                    ],
+                }
+            ),
+            200,
+        )
+
+    @staticmethod
     async def add_batch(user_id, title, description):
         errors = {}
         if len(description.strip()) == 0:
