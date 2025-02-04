@@ -58,7 +58,7 @@ class BatchFormController:
         return (
             jsonify(
                 {
-                    "message": "success add batch",
+                    "message": "success get all batch",
                     "data": [
                         {
                             "batch_id": item.batch_form_id,
