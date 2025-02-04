@@ -12,7 +12,6 @@ import datetime
 from .config import (
     broker_url,
     result_backend,
-    secret_key,
     smtp_email,
     smtp_password,
     smtp_host,
@@ -27,6 +26,7 @@ from .jwt import jwt
 from .mail import mail
 import cloudinary
 import cloudinary.uploader
+import os
 
 
 def create_app():
@@ -39,6 +39,10 @@ def create_app():
         secure=True,
     )
 
+    BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+    private_key_path = os.path.join(BASE_DIR, "private.pem")
+    public_key_path = os.path.join(BASE_DIR, "public.pem")
+
     app.config.from_mapping(
         CELERY=dict(
             broker_url=broker_url,
@@ -47,7 +51,9 @@ def create_app():
         ),
     )
     app.config.from_prefixed_env()
-    app.config["JWT_SECRET_KEY"] = secret_key
+    app.config["JWT_ALGORITHM"] = "RS256"
+    app.config["JWT_PRIVATE_KEY"] = open(private_key_path, "r").read()
+    app.config["JWT_PUBLIC_KEY"] = open(public_key_path, "r").read()
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
     app.config["MAIL_SERVER"] = smtp_host
     app.config["MAIL_PORT"] = smtp_port
@@ -97,6 +103,7 @@ def create_app():
         from .api.account_active import account_active_router
         from .api.image_api import image_router
         from .api.logout import logout_router
+        from .api.batch import batch_form_router
 
         app.register_blueprint(register_router)
         app.register_blueprint(login_router)
@@ -106,6 +113,7 @@ def create_app():
         app.register_blueprint(account_active_router)
         app.register_blueprint(image_router)
         app.register_blueprint(logout_router)
+        app.register_blueprint(batch_form_router)
 
         db.create_all()
 
