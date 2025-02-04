@@ -28,7 +28,7 @@ class BatchDatabase(Database):
     @staticmethod
     async def get(category, **kwargs):
         if category == "all_batch":
-            return BatchFormModel.query.all()
+            return BatchFormModel.query.all().order_by(BatchFormModel.created_at.desc())
 
     @staticmethod
     async def delete(category, **kwargs):
