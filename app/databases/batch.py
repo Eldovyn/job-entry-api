@@ -1,6 +1,7 @@
 from .database import Database
 from ..models import BatchFormModel, UserModel
 from ..database import db
+import difflib
 
 
 class BatchDatabase(Database):
@@ -28,12 +29,35 @@ class BatchDatabase(Database):
     @staticmethod
     async def get(category, **kwargs):
         batch_id = kwargs.get("batch_id")
+        title = kwargs.get("title")
+        limit = kwargs.get("limit")
         if category == "all_batch":
-            return BatchFormModel.query.order_by(BatchFormModel.created_at.desc()).all()
+            if limit:
+                return (
+                    BatchFormModel.query.order_by(BatchFormModel.created_at.desc())
+                    .limit(limit)
+                    .all()
+                )
+            else:
+                return BatchFormModel.query.order_by(
+                    BatchFormModel.created_at.desc()
+                ).all()
         if category == "batch_id":
             return BatchFormModel.query.filter(
                 BatchFormModel.batch_form_id == batch_id
             ).first()
+        if category == "title":
+            list_batch = BatchFormModel.query.order_by(
+                BatchFormModel.created_at.desc()
+            ).all()
+            titles = [batch.title for batch in list_batch]
+            matches = difflib.get_close_matches(title, titles, n=5, cutoff=0.5)
+            similar_batchs = (
+                BatchFormModel.query.order_by(BatchFormModel.created_at.desc())
+                .filter(BatchFormModel.title.in_(matches))
+                .all()
+            )
+            return similar_batchs
 
     @staticmethod
     async def delete(category, **kwargs):

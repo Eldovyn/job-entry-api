@@ -2,14 +2,15 @@ from ..databases import BatchDatabase, UserDatabase
 from flask import jsonify
 import datetime
 from ..utils import generate_id
+import difflib
 
 
 class BatchFormController:
     @staticmethod
-    async def get_batch_id(user_id, batch_id):
+    async def get_batch_title_id(user_id, q):
         errors = {}
-        if len(batch_id.strip()) == 0:
-            errors["batch_id"] = ["batch id cannot be empty"]
+        if len(q.strip()) == 0:
+            errors["q"] = ["query cannot be empty"]
         if errors:
             return jsonify({"message": "input invalid", "errors": errors}), 400
         if not (user := await UserDatabase.get("user_id", user_id=user_id)):
@@ -22,18 +23,40 @@ class BatchFormController:
                 jsonify({"message": "authorization invalid"}),
                 401,
             )
-        if not (batch := await BatchDatabase.get("batch_id", batch_id=batch_id)):
-            return jsonify({"message": "batch not found"}), 404
+        if not (batch := await BatchDatabase.get("title", title=q)):
+            if not (batch := await BatchDatabase.get("batch_id", batch_id=q)):
+                return jsonify({"message": "batch not found"}), 404
+        if isinstance(batch, list):
+            return (
+                jsonify(
+                    {
+                        "message": f"success get batch {q!r}",
+                        "data": [
+                            {
+                                "batch_id": item.batch_form_id,
+                                "title": item.title,
+                                "description": item.description,
+                                "created_at": item.created_at,
+                                "updated_at": item.created_at,
+                                "author": item.user.username,
+                                "is_active": item.is_active,
+                            }
+                            for item in batch
+                        ],
+                    },
+                ),
+                200,
+            )
         return (
             jsonify(
                 {
-                    "message": f"success get batch {batch_id!r}",
+                    "message": f"success get batch {q!r}",
                     "data": {
                         "batch_id": batch.batch_form_id,
                         "title": batch.title,
                         "description": batch.description,
                         "created_at": batch.created_at,
-                        "updated_at": batch.created_at,
+                        "updated_at": batch.updated_at,
                         "author": batch.user.username,
                         "is_active": batch.is_active,
                     },
@@ -43,7 +66,32 @@ class BatchFormController:
         )
 
     @staticmethod
-    async def get_all_batch(user_id):
+    async def get_all_batch(user_id, limit, per_page, current_page):
+        errors = {}
+        if limit and not limit.isdigit():
+            errors["limit"] = ["limit must be a number"]
+        if limit and limit.isdigit():
+            limit = int(limit)
+            if limit <= 0:
+                errors.setdefault("limit", []).append("limit must be greater than 0")
+        if per_page and not per_page.isdigit():
+            errors["per_page"] = ["per_page must be a number"]
+        if per_page and per_page.isdigit():
+            per_page = int(per_page)
+            if per_page <= 0:
+                errors.setdefault("per_page", []).append(
+                    "per_page must be greater than 0"
+                )
+        if current_page and not current_page.isdigit():
+            errors["current_page"] = ["current_page must be a number"]
+        if current_page and current_page.isdigit():
+            current_page = int(current_page)
+            if current_page < 0:
+                errors.setdefault("current_page", []).append(
+                    "current_page must be greater than 0"
+                )
+        if errors:
+            return jsonify({"message": "input invalid", "errors": errors}), 400
         if not (user := await UserDatabase.get("user_id", user_id=user_id)):
             return (
                 jsonify({"message": "authorization invalid"}),
@@ -54,7 +102,16 @@ class BatchFormController:
                 jsonify({"message": "authorization invalid"}),
                 401,
             )
-        batch = await BatchDatabase.get("all_batch")
+        if limit:
+            batch = await BatchDatabase.get("all_batch", limit=limit)
+        else:
+            batch = await BatchDatabase.get("all_batch")
+        paginated_data = [
+            batch[i : i + per_page] for i in range(0, len(batch), per_page)
+        ]
+        paginated_batches_dict = [
+            [batch.to_dict() for batch in page] for page in paginated_data
+        ]
         return (
             jsonify(
                 {
@@ -71,6 +128,14 @@ class BatchFormController:
                         }
                         for item in batch
                     ],
+                    "page": {
+                        "total_page": len(paginated_batches_dict),
+                        "batches": paginated_batches_dict,
+                        "size": len(batch),
+                        "current_page": current_page,
+                        "limit": limit,
+                        "per_page": per_page,
+                    },
                 }
             ),
             200,

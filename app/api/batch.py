@@ -16,17 +16,18 @@ async def add_batch():
     return await batch_form_controller.add_batch(current_user, title, description)
 
 
-@batch_form_router.get("/job-entry/admin/batch")
+@batch_form_router.get("/job-entry/admin/search/batch")
 @jwt_required()
 async def get_batch():
     current_user = get_jwt_identity()
-    return await batch_form_controller.get_all_batch(current_user)
-
-
-@batch_form_router.get("/job-entry/admin/batch/id")
-@jwt_required()
-async def get_batch_id():
-    current_user = get_jwt_identity()
     data = request.args
-    batch_id = data.get("batch_id", "")
-    return await batch_form_controller.get_batch_id(current_user, batch_id)
+    q = data.get("q", "")
+    limit = data.get("limit", None)
+    per_page = data.get("per_page", "5")
+    current_page = data.get("current_page", "0")
+    if not q:
+        return await batch_form_controller.get_all_batch(
+            current_user, limit, per_page, current_page
+        )
+    else:
+        return await batch_form_controller.get_batch_title_id(current_user, q)

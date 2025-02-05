@@ -38,3 +38,13 @@ class BatchFormModel(db.Model):
 
     def __repr__(self):
         return f"<Batch {self.batch_form_id}>"
+
+    def to_dict(self):
+        return {
+            "batch_form_id": self.batch_form_id,
+            "user_id": self.user_id,
+            "title": self.title,
+            "description": self.description,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+        }
