@@ -149,18 +149,7 @@ class BatchFormController:
             jsonify(
                 {
                     "message": f"success delete batch",
-                    "data": [
-                        {
-                            "batch_id": item.batch_form_id,
-                            "title": item.title,
-                            "description": item.description,
-                            "created_at": item.created_at,
-                            "updated_at": item.created_at,
-                            "author": item.user.username,
-                            "is_active": item.is_active,
-                        }
-                        for item in batch
-                    ],
+                    "data": batch_data.to_dict(),
                     "page": {
                         "total_page": len(paginated_batches_dict),
                         "batches": paginated_batches_dict,
