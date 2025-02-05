@@ -2,7 +2,7 @@ from ..databases import BatchDatabase, UserDatabase
 from flask import jsonify
 import datetime
 from ..utils import generate_id
-import difflib
+import cloudinary
 
 
 class BatchFormController:
@@ -62,6 +62,7 @@ class BatchFormController:
         paginated_batches_dict = [
             [batch.to_dict() for batch in page] for page in paginated_data
         ]
+        avatar_url = cloudinary.CloudinaryImage(user.user_avatar.avatar).url
         return (
             jsonify(
                 {
@@ -85,6 +86,16 @@ class BatchFormController:
                         "current_page": current_page,
                         "limit": limit,
                         "per_page": per_page,
+                    },
+                    "user": {
+                        "user_id": user.user_id,
+                        "username": user.username,
+                        "email": user.email,
+                        "is_active": user.is_active,
+                        "is_admin": user.is_admin,
+                        "avatar": avatar_url,
+                        "created_at": user.created_at,
+                        "updated_at": user.updated_at,
                     },
                 },
             ),
@@ -138,6 +149,7 @@ class BatchFormController:
         paginated_batches_dict = [
             [batch.to_dict() for batch in page] for page in paginated_data
         ]
+        avatar_url = cloudinary.CloudinaryImage(user.user_avatar.avatar).url
         return (
             jsonify(
                 {
@@ -161,6 +173,16 @@ class BatchFormController:
                         "current_page": current_page,
                         "limit": limit,
                         "per_page": per_page,
+                    },
+                    "user": {
+                        "user_id": user.user_id,
+                        "username": user.username,
+                        "email": user.email,
+                        "is_active": user.is_active,
+                        "is_admin": user.is_admin,
+                        "avatar": avatar_url,
+                        "created_at": user.created_at,
+                        "updated_at": user.updated_at,
                     },
                 }
             ),
