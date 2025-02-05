@@ -55,6 +55,7 @@ class BatchDatabase(Database):
             similar_batchs = (
                 BatchFormModel.query.order_by(BatchFormModel.created_at.desc())
                 .filter(BatchFormModel.title.in_(matches))
+                .limit(limit)
                 .all()
             )
             return similar_batchs

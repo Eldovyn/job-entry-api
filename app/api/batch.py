@@ -30,4 +30,6 @@ async def get_batch():
             current_user, limit, per_page, current_page
         )
     else:
-        return await batch_form_controller.get_batch_title_id(current_user, q)
+        return await batch_form_controller.get_batch_title_id(
+            current_user, q, limit, per_page, current_page
+        )

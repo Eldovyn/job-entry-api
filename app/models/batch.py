@@ -41,7 +41,7 @@ class BatchFormModel(db.Model):
 
     def to_dict(self):
         return {
-            "batch_form_id": self.batch_form_id,
+            "batch_id": self.batch_form_id,
             "user_id": self.user_id,
             "title": self.title,
             "description": self.description,
