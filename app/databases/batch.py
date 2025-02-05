@@ -73,4 +73,13 @@ class BatchDatabase(Database):
 
     @staticmethod
     async def update(category, **kwargs):
-        pass
+        batch_id = kwargs.get("batch_id")
+        created_at = kwargs.get("created_at")
+        if category == "status_batch_id":
+            if data := BatchFormModel.query.filter(
+                BatchFormModel.batch_form_id == batch_id
+            ).first():
+                data.is_active = not data.is_active
+                data.updated_at = created_at
+                db.session.commit()
+                return data

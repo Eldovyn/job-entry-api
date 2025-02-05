@@ -31,6 +31,25 @@ async def delete_batch():
     )
 
 
+@batch_form_router.patch("/job-entry/admin/batch/status")
+@jwt_required()
+async def update_status_batch():
+    current_user = get_jwt_identity()
+    data = request.json
+    params = request.args
+    batch_id = data.get("batch_id", "")
+    limit = params.get("limit", None)
+    per_page = params.get("per_page", "5")
+    current_page = params.get("current_page", "0")
+    return await batch_form_controller.update_status_batch(
+        current_user,
+        batch_id,
+        limit,
+        per_page,
+        current_page,
+    )
+
+
 @batch_form_router.get("/job-entry/admin/search/batch")
 @jwt_required()
 async def get_batch():
