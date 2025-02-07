@@ -324,6 +324,8 @@ class BatchFormController:
             if limit
             else await BatchDatabase.get("all_batch")
         )
+        if not batch:
+            return jsonify({"message": "batch not found"}), 404
 
         per_page = int(per_page) if per_page else 10
         current_page = int(current_page) if current_page else 1
