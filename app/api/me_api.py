@@ -10,4 +10,4 @@ user_controller = UserController()
 @jwt_required()
 async def user_login():
     current_user = get_jwt_identity()
-    return await UserController.user_me(current_user)
+    return await user_controller.user_me(current_user)

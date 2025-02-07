@@ -10,4 +10,4 @@ async def user_login():
     data = request.json
     email = data.get("email", "")
     password = data.get("password", "")
-    return await UserController.user_login(email, password)
+    return await user_controller.user_login(email, password)

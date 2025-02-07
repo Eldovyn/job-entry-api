@@ -12,7 +12,7 @@ from ..utils import (
 )
 from ..task import send_email_task
 from ..config import job_entry_url
-import cloudinary
+import cloudinary.api
 
 
 class UserController:
@@ -23,7 +23,9 @@ class UserController:
                 jsonify({"message": "authorization invalid"}),
                 401,
             )
-        avatar_url = cloudinary.CloudinaryImage(user.user_avatar.avatar).url
+        avatar_url = cloudinary.api.resource_by_asset_id(user.user_avatar.avatar)[
+            "secure_url"
+        ]
         return (
             jsonify(
                 {
@@ -74,7 +76,9 @@ class UserController:
                 401,
             )
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
-        avatar_url = cloudinary.CloudinaryImage(user.user_avatar.avatar).url
+        avatar_url = cloudinary.api.resource_by_asset_id(user.user_avatar.avatar)[
+            "secure_url"
+        ]
         if not user.is_active:
             expired_at = created_at + 300
             email_token = await TokenAccountActiveEmail.insert(
