@@ -97,7 +97,9 @@ class UpdateProfileController:
             new_email=email,
             created_at=created_at,
         )
-        avatar_url = cloudinary.CloudinaryImage(user.user_avatar.avatar).url
+        avatar_url = cloudinary.api.resource_by_asset_id(user.user_avatar.avatar)[
+            "secure_url"
+        ]
         return (
             jsonify(
                 {
