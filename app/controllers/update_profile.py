@@ -91,12 +91,15 @@ class UpdateProfileController:
                 409,
             )
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
-        user_email = await UserDatabase.update(
-            "email",
-            user_id=user_id,
-            new_email=email,
-            created_at=created_at,
-        )
+        try:
+            user_email = await UserDatabase.update(
+                "email",
+                user_id=user_id,
+                new_email=email,
+                created_at=created_at,
+            )
+        except Exception:
+            return jsonify({"message": "email already exists"}), 409
         avatar_url = cloudinary.api.resource_by_asset_id(user.user_avatar.avatar)[
             "secure_url"
         ]
@@ -141,12 +144,15 @@ class UpdateProfileController:
                 409,
             )
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
-        user_username = await UserDatabase.update(
-            "username",
-            user_id=user_id,
-            new_username=username,
-            created_at=created_at,
-        )
+        try:
+            user_username = await UserDatabase.update(
+                "username",
+                user_id=user_id,
+                new_username=username,
+                created_at=created_at,
+            )
+        except Exception:
+            return jsonify({"message": "username already exists"}), 409
         avatar_url = cloudinary.api.resource_by_asset_id(user.user_avatar.avatar)[
             "secure_url"
         ]
