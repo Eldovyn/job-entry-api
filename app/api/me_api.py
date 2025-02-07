@@ -8,6 +8,6 @@ user_controller = UserController()
 
 @me_router.get("/job-entry/@me")
 @jwt_required()
-async def user_login():
+async def user_me():
     current_user = get_jwt_identity()
     return await user_controller.user_me(current_user)
