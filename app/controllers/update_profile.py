@@ -2,7 +2,7 @@ from flask import jsonify
 from ..utils import Validation
 from ..databases import UserDatabase
 import datetime
-import cloudinary
+import cloudinary.api
 import cloudinary.uploader
 import os
 from werkzeug.datastructures import FileStorage
@@ -145,7 +145,9 @@ class UpdateProfileController:
             new_username=username,
             created_at=created_at,
         )
-        avatar_url = cloudinary.CloudinaryImage(user.user_avatar.avatar).url
+        avatar_url = cloudinary.api.resource_by_asset_id(user.user_avatar.avatar)[
+            "secure_url"
+        ]
         return (
             jsonify(
                 {
