@@ -1,5 +1,5 @@
 from .database import Database
-from ..models import ResetPasswordModel, UserModel
+from ..models import ResetPasswordModel, UsersModel
 from ..database import db
 
 
@@ -8,7 +8,7 @@ class ResetPasswordDatabase(Database):
     async def insert(
         reset_password_id, user_id, token_email, token_web, expired_at, created_at
     ):
-        if user := UserModel.query.filter(UserModel.user_id == user_id).first():
+        if user := UsersModel.query.filter(UsersModel.user_id == user_id).first():
             if token := ResetPasswordModel.query.filter(
                 ResetPasswordModel.user_id == user_id
             ).first():
@@ -75,7 +75,7 @@ class ResetPasswordDatabase(Database):
         updated_at = kwargs.get("updated_at")
         password = kwargs.get("password")
         if category == "user_id":
-            if user := UserModel.query.filter(UserModel.user_id == user_id).first():
+            if user := UsersModel.query.filter(UsersModel.user_id == user_id).first():
                 user.is_active = True
                 db.session.commit()
                 if token := ResetPasswordModel.query.filter(

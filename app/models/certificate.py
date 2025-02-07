@@ -4,23 +4,22 @@ from sqlalchemy.orm import relationship
 import datetime
 
 
-class UserAvatarModel(db.Model):
-    __tablename__ = "user_avatar"
+class UserCertificateModel(db.Model):
+    __tablename__ = "user_certificate"
 
-    avatar_id = Column(String, primary_key=True)
+    certificate_id = Column(String, primary_key=True)
     user_id = Column(String, ForeignKey("users.user_id", ondelete="CASCADE"))
-    avatar = Column(String, nullable=False)
+    certificate = Column(String, nullable=False)
     created_at = Column(Integer, nullable=False)
     updated_at = Column(Integer, nullable=False)
+    user = relationship("UserFormModel", back_populates="user_certificate")
 
-    user = relationship("UsersModel", back_populates="user_avatar")
-
-    def __init__(self, avatar, avatar_id, user_id):
-        self.avatar_id = avatar_id
-        self.avatar = avatar
+    def __init__(self, certificate, certificate_id, user_id):
+        self.certificate_id = certificate_id
+        self.certificate = certificate
         self.user_id = user_id
         self.created_at = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
         self.updated_at = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
 
     def __repr__(self):
-        return f"<UserAvatar {self.avatar_id!r}>"
+        return f"<UserCertificate {self.certificate_id!r}>"

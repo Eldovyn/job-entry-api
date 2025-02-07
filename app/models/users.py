@@ -1,10 +1,9 @@
 from sqlalchemy import Column, String, Integer, Boolean
 from ..database import db
 from sqlalchemy.orm import relationship
-import datetime
 
 
-class UserModel(db.Model):
+class UsersModel(db.Model):
     __tablename__ = "users"
     user_id = Column(String, primary_key=True)
     username = Column(String(20), unique=True, nullable=False)
@@ -19,15 +18,35 @@ class UserModel(db.Model):
         Integer,
         nullable=False,
     )
+    is_admin = Column(Boolean, nullable=False, default=False)
+
     account_active = relationship(
-        "AccountActiveModel", uselist=False, back_populates="user"
+        "AccountActiveModel",
+        uselist=False,
+        back_populates="user",
+        cascade="all, delete",
     )
     reset_password = relationship(
-        "ResetPasswordModel", uselist=False, back_populates="user"
+        "ResetPasswordModel",
+        uselist=False,
+        back_populates="user",
+        cascade="all, delete",
     )
-    user_avatar = relationship("UserAvatarModel", uselist=False, back_populates="user")
-    batch_form = relationship("BatchFormModel", uselist=False, back_populates="user")
-    is_admin = Column(Boolean, nullable=False, default=False)
+    user_avatar = relationship(
+        "UserAvatarModel", uselist=False, back_populates="user", cascade="all, delete"
+    )
+    batch_form = relationship(
+        "BatchFormModel",
+        uselist=False,
+        back_populates="user",
+        cascade="all, delete",
+    )
+    user_form = relationship(
+        "UserFormModel",
+        uselist=False,
+        back_populates="user",
+        cascade="all, delete",
+    )
 
     def __init__(self, user_id, username, email, password, created_at):
         self.user_id = user_id

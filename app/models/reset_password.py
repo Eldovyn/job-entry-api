@@ -23,7 +23,8 @@ class ResetPasswordModel(db.Model):
         Integer,
         nullable=False,
     )
-    user = relationship("UserModel", back_populates="reset_password")
+
+    user = relationship("UsersModel", back_populates="reset_password")
 
     def __init__(
         self,

@@ -1,5 +1,5 @@
 from .database import Database
-from ..models import AccountActiveModel, UserModel
+from ..models import AccountActiveModel, UsersModel
 import datetime
 from ..database import db
 
@@ -9,7 +9,7 @@ class AccountActiveDatabase(Database):
     async def insert(
         account_active_id, user_id, email_token, web_token, expired_at, created_at
     ):
-        if user := UserModel.query.filter(UserModel.user_id == user_id).first():
+        if user := UsersModel.query.filter(UsersModel.user_id == user_id).first():
             if token := AccountActiveModel.query.filter(
                 AccountActiveModel.user_id == user_id
             ).first():
@@ -38,13 +38,13 @@ class AccountActiveDatabase(Database):
         token_web = kwargs.get("token_web")
         token_email = kwargs.get("token_email")
         if category == "account_active":
-            if user := UserModel.query.filter(UserModel.user_id == user_id).first():
+            if user := UsersModel.query.filter(UsersModel.user_id == user_id).first():
                 return AccountActiveModel.query.filter(
                     AccountActiveModel.user_id == user.user_id,
                     AccountActiveModel.token_web == token_web,
                 ).first()
         if category == "account_active_email":
-            if user := UserModel.query.filter(UserModel.user_id == user_id).first():
+            if user := UsersModel.query.filter(UsersModel.user_id == user_id).first():
                 return AccountActiveModel.query.filter(
                     AccountActiveModel.token_email == token_email,
                     AccountActiveModel.user_id == user.user_id,
@@ -72,7 +72,7 @@ class AccountActiveDatabase(Database):
         expired_at = kwargs.get("expired_at")
         updated_at = kwargs.get("updated_at")
         if category == "user_active":
-            if user := UserModel.query.filter(UserModel.user_id == user_id).first():
+            if user := UsersModel.query.filter(UsersModel.user_id == user_id).first():
                 user.is_active = True
                 user.updated_at = updated_at
                 db.session.commit()

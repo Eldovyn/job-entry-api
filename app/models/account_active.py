@@ -23,7 +23,8 @@ class AccountActiveModel(db.Model):
         Integer,
         nullable=False,
     )
-    user = relationship("UserModel", back_populates="account_active")
+
+    user = relationship("UsersModel", back_populates="account_active")
 
     def __init__(
         self,

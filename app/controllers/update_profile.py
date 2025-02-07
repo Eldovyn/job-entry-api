@@ -40,7 +40,7 @@ class UpdateProfileController:
             return jsonify({"message": "authorization invalid"}), 401
 
         result = cloudinary.uploader.upload(avatar, folder="avatars/")
-
+        print(result)
         user_avatar = await UserDatabase.update(
             "avatar",
             user_id=user_id,

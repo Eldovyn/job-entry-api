@@ -1,5 +1,5 @@
 from .database import Database
-from ..models import BatchFormModel, UserModel
+from ..models import BatchFormModel, UsersModel
 from ..database import db
 import difflib
 
@@ -13,7 +13,7 @@ class BatchDatabase(Database):
         description,
         created_at,
     ):
-        if user := UserModel.query.filter(UserModel.user_id == user_id).first():
+        if user := UsersModel.query.filter(UsersModel.user_id == user_id).first():
             batch_data = BatchFormModel(
                 batch_form_id=batch_form_id,
                 user_id=user.user_id,

@@ -18,7 +18,9 @@ class BatchFormModel(db.Model):
         nullable=False,
     )
     is_active = Column(Boolean, nullable=False, default=True)
-    user = relationship("UserModel", back_populates="batch_form")
+
+    user = relationship("UsersModel", back_populates="batch_form")
+    user_form = relationship("UserFormModel", uselist=False, back_populates="batch")
 
     def __init__(
         self,

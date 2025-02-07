@@ -1,9 +1,9 @@
 from flask import Flask, jsonify
-from .models import UserModel
+from .models import UsersModel
 from .celery_app import celery_init_app
 from .models import (
     ResetPasswordModel,
-    UserModel,
+    UsersModel,
     AccountActiveModel,
     TokenBlocklistModel,
 )
@@ -104,7 +104,9 @@ def create_app():
         from .api.image_api import image_router
         from .api.logout import logout_router
         from .api.batch import batch_form_router
+        from .api.attachment import attachment_router
 
+        app.register_blueprint(attachment_router)
         app.register_blueprint(register_router)
         app.register_blueprint(login_router)
         app.register_blueprint(me_router)
@@ -141,8 +143,8 @@ def create_app():
     @jwt.user_lookup_loader
     def user_lookup_callback(_jwt_header, jwt_data):
         identity = jwt_data["sub"]
-        return UserModel.query.filter(
-            UserModel.user_id == identity, UserModel.is_active == True
+        return UsersModel.query.filter(
+            UsersModel.user_id == identity, UsersModel.is_active == True
         ).first()
 
     @jwt.revoked_token_loader
