@@ -43,8 +43,10 @@ class BatchFormModel(db.Model):
         return {
             "batch_id": self.batch_form_id,
             "user_id": self.user_id,
+            "author": self.user.username,
             "title": self.title,
             "description": self.description,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
+            "is_active": self.is_active,
         }

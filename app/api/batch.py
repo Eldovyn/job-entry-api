@@ -11,9 +11,15 @@ batch_form_controller = BatchFormController()
 async def add_batch():
     current_user = get_jwt_identity()
     data = request.json
+    params = request.args
     title = data.get("title", "")
     description = data.get("description", "")
-    return await batch_form_controller.add_batch(current_user, title, description)
+    limit = params.get("limit", None)
+    per_page = params.get("per_page", "5")
+    current_page = params.get("current_page", "1")
+    return await batch_form_controller.add_batch(
+        current_user, title, description, limit, per_page, current_page
+    )
 
 
 @batch_form_router.delete("/job-entry/admin/batch")
@@ -21,11 +27,11 @@ async def add_batch():
 async def delete_batch():
     current_user = get_jwt_identity()
     data = request.json
-    args = request.args
+    params = request.args
     batch_id = data.get("batch_id", "")
-    limit = args.get("limit", None)
-    per_page = args.get("per_page", "5")
-    current_page = args.get("current_page", "0")
+    limit = params.get("limit", None)
+    per_page = params.get("per_page", "5")
+    current_page = params.get("current_page", "1")
     return await batch_form_controller.delete_batch(
         current_user, batch_id, limit, per_page, current_page
     )
@@ -40,7 +46,7 @@ async def update_status_batch():
     batch_id = data.get("batch_id", "")
     limit = params.get("limit", None)
     per_page = params.get("per_page", "5")
-    current_page = params.get("current_page", "0")
+    current_page = params.get("current_page", "1")
     return await batch_form_controller.update_status_batch(
         current_user,
         batch_id,
@@ -58,7 +64,7 @@ async def get_batch():
     q = data.get("q", "")
     limit = data.get("limit", None)
     per_page = data.get("per_page", "5")
-    current_page = data.get("current_page", "0")
+    current_page = data.get("current_page", "1")
     if not q:
         return await batch_form_controller.get_all_batch(
             current_user, limit, per_page, current_page
