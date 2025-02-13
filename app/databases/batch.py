@@ -31,25 +31,33 @@ class BatchDatabase(Database):
         batch_id = kwargs.get("batch_id")
         title = kwargs.get("title")
         limit = kwargs.get("limit")
+        role = kwargs.get("role")
         if category == "all_batch":
-            if limit:
-                return (
-                    BatchFormModel.query.order_by(BatchFormModel.created_at.desc())
-                    .limit(limit)
-                    .all()
-                )
-            else:
+            if role == "admin":
                 return BatchFormModel.query.order_by(
                     BatchFormModel.created_at.desc()
                 ).all()
+            else:
+                return (
+                    BatchFormModel.query.filter(BatchFormModel.is_active == True)
+                    .order_by(BatchFormModel.created_at.desc())
+                    .all()
+                )
         if category == "batch_id":
             return BatchFormModel.query.filter(
                 BatchFormModel.batch_form_id == batch_id
             ).first()
         if category == "title":
-            list_batch = BatchFormModel.query.order_by(
-                BatchFormModel.created_at.desc()
-            ).all()
+            if role == "admin":
+                list_batch = BatchFormModel.query.order_by(
+                    BatchFormModel.created_at.desc()
+                ).all()
+            else:
+                list_batch = (
+                    BatchFormModel.query.filter(BatchFormModel.is_active == True)
+                    .order_by(BatchFormModel.created_at.desc())
+                    .all()
+                )
             titles = [batch.title for batch in list_batch]
             matches = difflib.get_close_matches(title, titles, n=5, cutoff=0.5)
             similar_batchs = (

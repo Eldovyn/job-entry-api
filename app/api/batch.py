@@ -58,7 +58,7 @@ async def update_status_batch():
 
 @batch_form_router.get("/job-entry/admin/search/batch")
 @jwt_required()
-async def get_batch():
+async def get_admin_batch():
     current_user = get_jwt_identity()
     data = request.args
     q = data.get("q", "")
@@ -67,9 +67,28 @@ async def get_batch():
     current_page = data.get("current_page", "1")
     if not q:
         return await batch_form_controller.get_all_batch(
-            current_user, limit, per_page, current_page
+            "admin", current_user, limit, per_page, current_page
         )
     else:
         return await batch_form_controller.get_batch_title_id(
-            current_user, q, limit, per_page, current_page
+            "admin", current_user, q, limit, per_page, current_page
+        )
+
+
+@batch_form_router.get("/job-entry/user/search/batch")
+@jwt_required()
+async def get_user_batch():
+    current_user = get_jwt_identity()
+    data = request.args
+    q = data.get("q", "")
+    limit = data.get("limit", None)
+    per_page = data.get("per_page", "5")
+    current_page = data.get("current_page", "1")
+    if not q:
+        return await batch_form_controller.get_all_batch(
+            "user", current_user, limit, per_page, current_page
+        )
+    else:
+        return await batch_form_controller.get_batch_title_id(
+            "user", current_user, q, limit, per_page, current_page
         )

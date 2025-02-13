@@ -189,7 +189,7 @@ class BatchFormController:
         return jsonify(response_data), 201
 
     @staticmethod
-    async def get_batch_title_id(user_id, q, limit, per_page, current_page):
+    async def get_batch_title_id(role, user_id, q, limit, per_page, current_page):
         errors = {}
         if len(q.strip()) == 0:
             errors["q"] = ["query cannot be empty"]
@@ -229,10 +229,12 @@ class BatchFormController:
             )
         batch = []
         if limit:
-            if batch_title := await BatchDatabase.get("title", title=q, limit=limit):
+            if batch_title := await BatchDatabase.get(
+                "title", title=q, limit=limit, role=role
+            ):
                 batch.extend(batch_title)
         else:
-            if batch_title := await BatchDatabase.get("title", title=q):
+            if batch_title := await BatchDatabase.get("title", title=q, role=role):
                 batch.extend(batch_title)
         if batch_id := await BatchDatabase.get("batch_id", batch_id=q):
             batch.extend([batch_id])
@@ -289,7 +291,7 @@ class BatchFormController:
         return jsonify(response_data), 200
 
     @staticmethod
-    async def get_all_batch(user_id, limit, per_page, current_page):
+    async def get_all_batch(role, user_id, limit, per_page, current_page):
         def validate_input(value, param_name):
             if value and not value.isdigit():
                 return f"{param_name} must be a number"
@@ -320,9 +322,9 @@ class BatchFormController:
             return jsonify({"message": "authorization invalid"}), 401
 
         batch = (
-            await BatchDatabase.get("all_batch", limit=limit)
+            await BatchDatabase.get("all_batch", limit=limit, role=role)
             if limit
-            else await BatchDatabase.get("all_batch")
+            else await BatchDatabase.get("all_batch", role=role)
         )
         if not batch:
             return jsonify({"message": "batch not found"}), 404
