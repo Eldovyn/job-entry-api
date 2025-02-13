@@ -10,12 +10,14 @@ class UserFormModel(db.Model):
         String, ForeignKey("users.user_id", ondelete="CASCADE"), unique=True
     )
     batch_form_id = Column(
-        String, ForeignKey("batch_form.batch_form_id", ondelete="CASCADE"), unique=True
+        String, ForeignKey("batch_form.batch_form_id", ondelete="CASCADE")
     )
     nama = Column(String, nullable=False)
-    npm = Column(Integer, nullable=False)
+    npm = Column(String, nullable=False)
     kelas = Column(String, nullable=False)
     tempat_tanggal_lahir = Column(String, nullable=False)
+    jurusan = Column(String, nullable=False)
+    lokasi_kampus = Column(String, nullable=False)
     jenis_kelamin = Column(String, nullable=False)
     alamat = Column(String, nullable=False)
     no_hp = Column(String, nullable=False)
@@ -31,6 +33,36 @@ class UserFormModel(db.Model):
         "UsersModel", uselist=False, back_populates="user_form", cascade="all, delete"
     )
     batch = relationship("BatchFormModel", back_populates="user_form")
+    user_ktm = relationship(
+        "UserKtmModel", uselist=False, back_populates="user", cascade="all, delete"
+    )
+    user_ktp = relationship(
+        "UserKtpModel", uselist=False, back_populates="user", cascade="all, delete"
+    )
+    user_certificate = relationship(
+        "UserCertificateModel",
+        uselist=False,
+        back_populates="user",
+        cascade="all, delete",
+    )
+    user_krs = relationship(
+        "UserKrsModel", uselist=False, back_populates="user", cascade="all, delete"
+    )
+    user_rangkuman_nilai = relationship(
+        "UserRangkumanNilaiModel",
+        uselist=False,
+        back_populates="user",
+        cascade="all, delete",
+    )
+    user_cv = relationship(
+        "UserCvModel", uselist=False, back_populates="user", cascade="all, delete"
+    )
+    user_pas_foto = relationship(
+        "UserPasFotoModel",
+        uselist=False,
+        back_populates="user",
+        cascade="all, delete",
+    )
 
     def __init__(
         self,
@@ -41,6 +73,8 @@ class UserFormModel(db.Model):
         npm,
         kelas,
         tempat_tanggal_lahir,
+        jurusan,
+        lokasi_kampus,
         jenis_kelamin,
         alamat,
         no_hp,
@@ -56,6 +90,8 @@ class UserFormModel(db.Model):
         self.npm = npm
         self.kelas = kelas
         self.tempat_tanggal_lahir = tempat_tanggal_lahir
+        self.jurusan = jurusan
+        self.lokasi_kampus = lokasi_kampus
         self.jenis_kelamin = jenis_kelamin
         self.alamat = alamat
         self.no_hp = no_hp

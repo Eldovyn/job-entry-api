@@ -27,6 +27,7 @@ from .mail import mail
 import cloudinary
 import cloudinary.uploader
 import os
+from flask_migrate import Migrate
 
 
 def create_app():
@@ -72,6 +73,8 @@ def create_app():
     jwt.init_app(app)
     mail.init_app(app)
 
+    migrate = Migrate(app, db)
+
     @celery_app.task(name="delete_token_task")
     def delete_token_task():
         expired_at = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
@@ -105,7 +108,9 @@ def create_app():
         from .api.logout import logout_router
         from .api.batch import batch_form_router
         from .api.attachment import attachment_router
+        from .api.form import form_router
 
+        app.register_blueprint(form_router)
         app.register_blueprint(attachment_router)
         app.register_blueprint(register_router)
         app.register_blueprint(login_router)
