@@ -222,11 +222,6 @@ class BatchFormController:
                 jsonify({"message": "authorization invalid"}),
                 401,
             )
-        if not user.is_admin:
-            return (
-                jsonify({"message": "authorization invalid"}),
-                401,
-            )
         batch = []
         if limit:
             if batch_title := await BatchDatabase.get(
@@ -318,8 +313,6 @@ class BatchFormController:
             return jsonify({"message": "input invalid", "errors": errors}), 400
 
         user = await UserDatabase.get("user_id", user_id=user_id)
-        if not user or not user.is_admin:
-            return jsonify({"message": "authorization invalid"}), 401
 
         batch = (
             await BatchDatabase.get("all_batch", limit=limit, role=role)
