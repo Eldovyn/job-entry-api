@@ -289,7 +289,7 @@ class FormController:
         ):
             return jsonify({"message": "form already submitted"}), 409
         created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
-        token = IsSubmitToken.insert(user_id, created_at)
+        token = await IsSubmitToken.insert(user_id, created_at)
 
         if not (
             batch_form := await UserFormDatabase.insert(
