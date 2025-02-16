@@ -64,7 +64,7 @@ class UserFormModel(db.Model):
     )
     is_submit = relationship(
         "IsSubmitModel",
-        back_populates="batch_form",
+        back_populates="user_form",
         cascade="all, delete",
     )
 

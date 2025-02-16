@@ -21,6 +21,7 @@ class BatchFormModel(db.Model):
 
     user = relationship("UsersModel", back_populates="batch_form")
     user_form = relationship("UserFormModel", uselist=False, back_populates="batch")
+    is_submit = relationship("IsSubmitModel", back_populates="batch")
 
     def __init__(
         self,

@@ -13,11 +13,19 @@ class IsSubmitModel(db.Model):
         ForeignKey("user_form.user_form_id", ondelete="CASCADE"),
         nullable=False,
     )
+    batch_form_id = Column(
+        String,
+        ForeignKey("batch_form.batch_form_id", ondelete="CASCADE"),
+    )
 
-    batch_form = relationship("UserFormModel", back_populates="is_submit")
+    user_form = relationship(
+        "UserFormModel", back_populates="is_submit", foreign_keys=[user_form_id]
+    )
+    batch = relationship("BatchFormModel", back_populates="is_submit")
 
-    def __init__(self, user_form_id):
+    def __init__(self, user_form_id, batch_form_id):
         self.user_form_id = user_form_id
+        self.batch_form_id = batch_form_id
         self.submit_id = generate_id()
 
     def __repr__(self):

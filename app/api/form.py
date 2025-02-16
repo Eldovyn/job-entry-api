@@ -20,6 +20,14 @@ async def get_form():
     )
 
 
+@form_router.get("/job-entry/form/is-submitted")
+@jwt_required()
+async def get_form_is_submitted():
+    current_user = get_jwt_identity()
+    data = request.args
+    q = data.get("q", "")
+
+
 @form_router.post("/job-entry/form")
 @jwt_required()
 async def add_form():

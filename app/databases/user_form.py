@@ -85,7 +85,7 @@ class UserFormDatabase(Database):
                     if certificate
                     else None
                 )
-                is_submit = IsSubmitModel(user_form_id)
+                is_submit = IsSubmitModel(user_form_id, batch_id)
 
                 db.session.add(user_form)
                 db.session.add(user_cv)
