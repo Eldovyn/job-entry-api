@@ -156,9 +156,13 @@ class BatchFormController:
             else total_pages
         )
         paginated_items = (
-            paginated_batches_dict[current_page - 1]
-            if current_page <= total_pages
-            else paginated_batches_dict[-1]
+            (
+                paginated_batches_dict[current_page - 1]
+                if current_page <= total_pages
+                else paginated_batches_dict[-1]
+            )
+            if paginated_batches_dict
+            else []
         )
 
         response_data = {
