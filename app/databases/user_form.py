@@ -15,6 +15,7 @@ from ..models import (
 )
 import datetime
 from ..database import db
+from sqlalchemy import and_
 
 
 class UserFormDatabase(Database):
@@ -107,8 +108,10 @@ class UserFormDatabase(Database):
         user_id = kwargs.get("user_id")
         if category == "batch_id":
             return IsSubmitModel.query.filter(
-                IsSubmitModel.batch_form_id == batch_id,
-                IsSubmitModel.user_id == user_id,
+                and_(
+                    IsSubmitModel.batch_form_id == batch_id,
+                    IsSubmitModel.user_id == user_id,
+                )
             ).first()
 
     @staticmethod
