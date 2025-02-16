@@ -144,7 +144,9 @@ class UserController:
                 ),
                 403,
             )
-        access_token = create_access_token(identity=user)
+        access_token = create_access_token(
+            identity=user, additional_claims={"is_admin": user.is_admin}
+        )
         return (
             jsonify(
                 {

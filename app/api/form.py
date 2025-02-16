@@ -1,8 +1,23 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from ..controllers import FormController
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 
 form_router = Blueprint("form_router", __name__)
+
+
+@form_router.get("/job-entry/form")
+@jwt_required()
+async def get_form():
+    current_user = get_jwt_identity()
+    data = request.args
+    q = data.get("q", "")
+    claims = get_jwt()
+    if not "is_admin" in claims:
+        return jsonify({"message": "authorization invalid"}), 401
+    is_admin = claims["is_admin"]
+    return await FormController.get_form(
+        "user" if not is_admin else "admin", current_user, q, None, "5", "1"
+    )
 
 
 @form_router.post("/job-entry/form")

@@ -8,6 +8,71 @@ import cloudinary.uploader
 
 class FormController:
     @staticmethod
+    async def get_form(role, user_id, batch_id, limit, per_page, current_page):
+        errors = {}
+        if len(batch_id.strip()) == 0:
+            errors["batch_id"] = ["batch_id cannot be empty"]
+        if errors:
+            return jsonify({"message": "input invalid", "errors": errors}), 400
+        if not (user := await UserDatabase.get("user_id", user_id=user_id)):
+            return jsonify({"message": "authorization invalid"}), 401
+        if not (
+            batch := await BatchDatabase.get(
+                "form_batch_id", batch_id=batch_id, role=role
+            )
+        ):
+            return jsonify({"message": "batch not found"}), 404
+        per_page = int(per_page) if per_page else 10
+        current_page = int(current_page) if current_page else 1
+
+        paginated_data = [
+            batch[i : i + per_page] for i in range(0, len(batch), per_page)
+        ]
+        paginated_batches_dict = [
+            [batch.to_dict() for batch in page] for page in paginated_data
+        ]
+
+        avatar_url = cloudinary.CloudinaryImage(user.user_avatar.avatar).url
+        total_pages = len(paginated_batches_dict)
+        current_page = (
+            min(current_page, total_pages)
+            if current_page <= total_pages
+            else total_pages
+        )
+        paginated_items = (
+            paginated_batches_dict[current_page - 1]
+            if current_page <= total_pages
+            else paginated_batches_dict[-1]
+        )
+
+        response_data = {
+            "message": "success get all batch",
+            "data": [item.to_dict() for item in batch],
+            "page": {
+                "current_page": current_page,
+                "current_batch": paginated_items,
+                "total_pages": total_pages,
+                "total_items": len(batch),
+                "items_per_page": per_page,
+                "limit": limit,
+                "next_page": current_page + 1 if current_page < total_pages else None,
+                "previous_page": current_page - 1 if current_page > 1 else None,
+            },
+            "user": {
+                "user_id": user.user_id,
+                "username": user.username,
+                "email": user.email,
+                "is_active": user.is_active,
+                "is_admin": user.is_admin,
+                "avatar": avatar_url,
+                "created_at": user.created_at,
+                "updated_at": user.updated_at,
+            },
+        }
+
+        return jsonify(response_data), 200
+
+    @staticmethod
     async def post_form(
         user_id,
         batch_id,
