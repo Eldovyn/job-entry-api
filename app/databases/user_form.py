@@ -103,7 +103,8 @@ class UserFormDatabase(Database):
 
     @staticmethod
     async def get(category, **kwargs):
-        pass
+        if category == "is_submit":
+            return IsSubmitModel.query.first()
 
     @staticmethod
     async def delete(category, **kwargs):

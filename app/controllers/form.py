@@ -263,6 +263,11 @@ class FormController:
 
         user_form_id = generate_id()
 
+        if submit_form := await UserFormDatabase.get(
+            "is_submit", user_form_id=user_form_id
+        ):
+            return jsonify({"message": "form already submitted"}), 409
+
         if not (
             batch_form := await UserFormDatabase.insert(
                 user_id,
