@@ -109,6 +109,7 @@ def create_app():
         from .api.batch import batch_form_router
         from .api.attachment import attachment_router
         from .api.form import form_router
+        from .api.data_mahasiswa import data_mahasiswa_router
 
         app.register_blueprint(form_router)
         app.register_blueprint(attachment_router)
@@ -121,6 +122,7 @@ def create_app():
         app.register_blueprint(image_router)
         app.register_blueprint(logout_router)
         app.register_blueprint(batch_form_router)
+        app.register_blueprint(data_mahasiswa_router)
 
         db.create_all()
 

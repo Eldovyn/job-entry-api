@@ -5,3 +5,4 @@ from .image import *
 from .update_profile import *
 from .batch import *
 from .form import *
+from .data_mahasiswa import *

@@ -106,3 +106,33 @@ class UserFormModel(db.Model):
 
     def __repr__(self):
         return f"<UserForm {self.user_form_id}>"
+
+    def to_dict(self):
+        return {
+            "user_form_id": self.user_form_id,
+            "user_id": self.user_id,
+            "batch_form_id": self.batch_form_id,
+            "nama": self.nama,
+            "npm": self.npm,
+            "kelas": self.kelas,
+            "tempat_tanggal_lahir": self.tempat_tanggal_lahir,
+            "jurusan": self.jurusan,
+            "lokasi_kampus": self.lokasi_kampus,
+            "jenis_kelamin": self.jenis_kelamin,
+            "alamat": self.alamat,
+            "no_hp": self.no_hp,
+            "email": self.email,
+            "posisi": self.posisi,
+            "ipk": self.ipk,
+            "created_at": self.created_at,
+            "cv": self.user_cv.cv_id,
+            "pas_foto": self.user_pas_foto.pas_foto_id,
+            "ktp": self.user_ktp.ktp_id,
+            "krs": self.user_krs.krs_id,
+            "ktm": self.user_ktm.ktm_id,
+            "certificate": (
+                self.user_certificate.certificate_id if self.user_certificate else None
+            ),
+            "rangkuman_nilai": self.user_rangkuman_nilai.rangkuman_nilai_id,
+            "is_submit": self.is_submit[0].submit_id,
+        }

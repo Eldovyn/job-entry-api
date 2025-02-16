@@ -1,5 +1,5 @@
 from .database import Database
-from ..models import BatchFormModel, UsersModel
+from ..models import BatchFormModel, UsersModel, UserFormModel
 from ..database import db
 import difflib
 
@@ -77,6 +77,12 @@ class BatchDatabase(Database):
                 .all()
             )
             return similar_batchs
+        if category == "all_data_mahasiswa":
+            return (
+                UserFormModel.query.order_by(UserFormModel.created_at.desc())
+                .limit(limit)
+                .all()
+            )
 
     @staticmethod
     async def delete(category, **kwargs):

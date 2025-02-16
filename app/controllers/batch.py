@@ -2,7 +2,7 @@ from ..databases import BatchDatabase, UserDatabase
 from flask import jsonify
 import datetime
 from ..utils import generate_id
-import cloudinary
+import cloudinary.api
 
 
 class BatchFormController:
@@ -62,7 +62,9 @@ class BatchFormController:
         paginated_batches_dict = [
             [batch.to_dict() for batch in page] for page in paginated_data
         ]
-        avatar_url = cloudinary.CloudinaryImage(user.user_avatar.avatar).url
+        avatar_url = cloudinary.api.resource_by_asset_id(user.user_avatar.avatar)[
+            "secure_url"
+        ]
         return (
             jsonify(
                 {
@@ -148,7 +150,9 @@ class BatchFormController:
             [batch.to_dict() for batch in page] for page in paginated_data
         ]
 
-        avatar_url = cloudinary.CloudinaryImage(user.user_avatar.avatar).url
+        avatar_url = cloudinary.api.resource_by_asset_id(user.user_avatar.avatar)[
+            "secure_url"
+        ]
         total_pages = len(paginated_batches_dict)
         current_page = (
             min(current_page, total_pages)
@@ -249,7 +253,9 @@ class BatchFormController:
             [batch.to_dict() for batch in page] for page in paginated_data
         ]
 
-        avatar_url = cloudinary.CloudinaryImage(user.user_avatar.avatar).url
+        avatar_url = cloudinary.api.resource_by_asset_id(user.user_avatar.avatar)[
+            "secure_url"
+        ]
         total_pages = len(paginated_batches_dict)
         current_page = (
             min(current_page, total_pages)
@@ -336,7 +342,9 @@ class BatchFormController:
             [batch.to_dict() for batch in page] for page in paginated_data
         ]
 
-        avatar_url = cloudinary.CloudinaryImage(user.user_avatar.avatar).url
+        avatar_url = cloudinary.api.resource_by_asset_id(user.user_avatar.avatar)[
+            "secure_url"
+        ]
         total_pages = len(paginated_batches_dict)
         current_page = (
             min(current_page, total_pages)
@@ -441,7 +449,9 @@ class BatchFormController:
             [batch.to_dict() for batch in page] for page in paginated_data
         ]
 
-        avatar_url = cloudinary.CloudinaryImage(user.user_avatar.avatar).url
+        avatar_url = cloudinary.api.resource_by_asset_id(user.user_avatar.avatar)[
+            "secure_url"
+        ]
         total_pages = len(paginated_batches_dict)
         current_page = (
             min(current_page, total_pages)
