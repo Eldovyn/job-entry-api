@@ -465,7 +465,7 @@ class BatchFormController:
         )
 
         response_data = {
-            "message": "success delete batch",
+            "message": "success create batch",
             "data": batch_data.to_dict(),
             "page": {
                 "current_page": current_page,

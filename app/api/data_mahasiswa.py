@@ -16,9 +16,28 @@ async def get_data_mahasiswa():
     current_page = data.get("current_page", "1")
     if not q:
         return await DataMahasiswaController.get_all_data_mahasiswa(
-            current_user, limit, per_page, current_page
+            False, current_user, limit, per_page, current_page
         )
     else:
         return await DataMahasiswaController.get_data_mahasiswa_title_id(
-            current_user, q, limit, per_page, current_page
+            False, current_user, q, limit, per_page, current_page
+        )
+
+
+@data_mahasiswa_router.get("/job-entry/export/data-mahasiswa")
+@jwt_required()
+async def get_export_data_mahasiswa():
+    current_user = get_jwt_identity()
+    data = request.args
+    q = data.get("q", "")
+    limit = data.get("limit", None)
+    per_page = data.get("per_page", "5")
+    current_page = data.get("current_page", "1")
+    if not q:
+        return await DataMahasiswaController.get_all_data_mahasiswa(
+            True, current_user, limit, per_page, current_page
+        )
+    else:
+        return await DataMahasiswaController.get_data_mahasiswa_title_id(
+            True, current_user, q, limit, per_page, current_page
         )

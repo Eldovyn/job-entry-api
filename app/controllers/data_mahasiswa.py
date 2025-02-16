@@ -5,7 +5,9 @@ from ..databases import UserDatabase, BatchDatabase
 
 class DataMahasiswaController:
     @staticmethod
-    async def get_data_mahasiswa_title_id(user_id, q, limit, per_page, current_page):
+    async def get_data_mahasiswa_title_id(
+        export, user_id, q, limit, per_page, current_page
+    ):
         errors = {}
         if len(q.strip()) == 0:
             errors["q"] = ["query cannot be empty"]
@@ -55,7 +57,55 @@ class DataMahasiswaController:
             for i in range(0, len(data_mahasiswa), per_page)
         ]
         paginated_data_mahasiswaes_dict = [
-            [data_mahasiswa.to_dict() for data_mahasiswa in page]
+            [
+                (
+                    data_mahasiswa.to_dict()
+                    if not export
+                    else {
+                        "user_form_id": data_mahasiswa.user_form_id,
+                        "user_id": data_mahasiswa.user_id,
+                        "batch_form_id": data_mahasiswa.batch_form_id,
+                        "nama": data_mahasiswa.nama,
+                        "npm": data_mahasiswa.npm,
+                        "kelas": data_mahasiswa.kelas,
+                        "tempat_tanggal_lahir": data_mahasiswa.tempat_tanggal_lahir,
+                        "jurusan": data_mahasiswa.jurusan,
+                        "lokasi_kampus": data_mahasiswa.lokasi_kampus,
+                        "jenis_kelamin": data_mahasiswa.jenis_kelamin,
+                        "alamat": data_mahasiswa.alamat,
+                        "no_hp": data_mahasiswa.no_hp,
+                        "email": data_mahasiswa.email,
+                        "posisi": data_mahasiswa.posisi,
+                        "ipk": data_mahasiswa.ipk,
+                        "created_at": data_mahasiswa.created_at,
+                        "cv": cloudinary.api.resource_by_asset_id(
+                            data_mahasiswa.user_cv.cv
+                        )["secure_url"],
+                        "pas_foto": cloudinary.api.resource_by_asset_id(
+                            data_mahasiswa.user_pas_foto.pas_foto
+                        )["secure_url"],
+                        "ktp": cloudinary.api.resource_by_asset_id(
+                            data_mahasiswa.user_ktp.ktp
+                        )["secure_url"],
+                        "krs": cloudinary.api.resource_by_asset_id(
+                            data_mahasiswa.user_krs.krs
+                        )["secure_url"],
+                        "ktm": cloudinary.api.resource_by_asset_id(
+                            data_mahasiswa.user_ktm.ktm
+                        )["secure_url"],
+                        "certificate": (
+                            cloudinary.api.resource_by_asset_id(
+                                data_mahasiswa.user_certificate.certificate
+                            )["secure_url"]
+                            if data_mahasiswa.user_certificate
+                            else None
+                        ),
+                        "rangkuman_nilai": data_mahasiswa.user_rangkuman_nilai.rangkuman_nilai_id,
+                        "is_submit": data_mahasiswa.is_submit[0].submit_id,
+                    }
+                )
+                for data_mahasiswa in page
+            ]
             for page in paginated_data
         ]
 
@@ -76,7 +126,55 @@ class DataMahasiswaController:
 
         response_data = {
             "message": "success get all data_mahasiswa",
-            "data": [item.to_dict() for item in data_mahasiswa],
+            "data": [
+                (
+                    item.to_dict()
+                    if not export
+                    else {
+                        "user_form_id": item.user_form_id,
+                        "user_id": item.user_id,
+                        "batch_form_id": item.batch_form_id,
+                        "nama": item.nama,
+                        "npm": item.npm,
+                        "kelas": item.kelas,
+                        "tempat_tanggal_lahir": item.tempat_tanggal_lahir,
+                        "jurusan": item.jurusan,
+                        "lokasi_kampus": item.lokasi_kampus,
+                        "jenis_kelamin": item.jenis_kelamin,
+                        "alamat": item.alamat,
+                        "no_hp": item.no_hp,
+                        "email": item.email,
+                        "posisi": item.posisi,
+                        "ipk": item.ipk,
+                        "created_at": item.created_at,
+                        "cv": cloudinary.api.resource_by_asset_id(item.user_cv.cv)[
+                            "secure_url"
+                        ],
+                        "pas_foto": cloudinary.api.resource_by_asset_id(
+                            item.user_pas_foto.pas_foto
+                        )["secure_url"],
+                        "ktp": cloudinary.api.resource_by_asset_id(item.user_ktp.ktp)[
+                            "secure_url"
+                        ],
+                        "krs": cloudinary.api.resource_by_asset_id(item.user_krs.krs)[
+                            "secure_url"
+                        ],
+                        "ktm": cloudinary.api.resource_by_asset_id(item.user_ktm.ktm)[
+                            "secure_url"
+                        ],
+                        "certificate": (
+                            cloudinary.api.resource_by_asset_id(
+                                item.user_certificate.certificate
+                            )["secure_url"]
+                            if item.user_certificate
+                            else None
+                        ),
+                        "rangkuman_nilai": item.user_rangkuman_nilai.rangkuman_nilai_id,
+                        "is_submit": item.is_submit[0].submit_id,
+                    }
+                )
+                for item in data_mahasiswa
+            ],
             "page": {
                 "current_page": current_page,
                 "current_data": paginated_items,
@@ -102,7 +200,7 @@ class DataMahasiswaController:
         return jsonify(response_data), 200
 
     @staticmethod
-    async def get_all_data_mahasiswa(user_id, limit, per_page, current_page):
+    async def get_all_data_mahasiswa(export, user_id, limit, per_page, current_page):
         def validate_input(value, param_name):
             if value and not value.isdigit():
                 return f"{param_name} must be a number"
@@ -141,7 +239,56 @@ class DataMahasiswaController:
             batch[i : i + per_page] for i in range(0, len(batch), per_page)
         ]
         paginated_batches_dict = [
-            [batch.to_dict() for batch in page] for page in paginated_data
+            [
+                (
+                    batch.to_dict()
+                    if not export
+                    else {
+                        "user_form_id": batch.user_form_id,
+                        "user_id": batch.user_id,
+                        "batch_form_id": batch.batch_form_id,
+                        "nama": batch.nama,
+                        "npm": batch.npm,
+                        "kelas": batch.kelas,
+                        "tempat_tanggal_lahir": batch.tempat_tanggal_lahir,
+                        "jurusan": batch.jurusan,
+                        "lokasi_kampus": batch.lokasi_kampus,
+                        "jenis_kelamin": batch.jenis_kelamin,
+                        "alamat": batch.alamat,
+                        "no_hp": batch.no_hp,
+                        "email": batch.email,
+                        "posisi": batch.posisi,
+                        "ipk": batch.ipk,
+                        "created_at": batch.created_at,
+                        "cv": cloudinary.api.resource_by_asset_id(batch.user_cv.cv)[
+                            "secure_url"
+                        ],
+                        "pas_foto": cloudinary.api.resource_by_asset_id(
+                            batch.user_pas_foto.pas_foto
+                        )["secure_url"],
+                        "ktp": cloudinary.api.resource_by_asset_id(batch.user_ktp.ktp)[
+                            "secure_url"
+                        ],
+                        "krs": cloudinary.api.resource_by_asset_id(batch.user_krs.krs)[
+                            "secure_url"
+                        ],
+                        "ktm": cloudinary.api.resource_by_asset_id(batch.user_ktm.ktm)[
+                            "secure_url"
+                        ],
+                        "certificate": (
+                            cloudinary.api.resource_by_asset_id(
+                                batch.user_certificate.certificate
+                            )["secure_url"]
+                            if batch.user_certificate
+                            else None
+                        ),
+                        "rangkuman_nilai": batch.user_rangkuman_nilai.rangkuman_nilai_id,
+                        "is_submit": batch.is_submit[0].submit_id,
+                    }
+                )
+                for batch in page
+            ]
+            for page in paginated_data
         ]
 
         avatar_url = cloudinary.api.resource_by_asset_id(user.user_avatar.avatar)[
@@ -161,7 +308,55 @@ class DataMahasiswaController:
 
         response_data = {
             "message": "success get all data mahasiswa",
-            "data": [item.to_dict() for item in batch],
+            "data": [
+                (
+                    item.to_dict()
+                    if not export
+                    else {
+                        "user_form_id": item.user_form_id,
+                        "user_id": item.user_id,
+                        "batch_form_id": item.batch_form_id,
+                        "nama": item.nama,
+                        "npm": item.npm,
+                        "kelas": item.kelas,
+                        "tempat_tanggal_lahir": item.tempat_tanggal_lahir,
+                        "jurusan": item.jurusan,
+                        "lokasi_kampus": item.lokasi_kampus,
+                        "jenis_kelamin": item.jenis_kelamin,
+                        "alamat": item.alamat,
+                        "no_hp": item.no_hp,
+                        "email": item.email,
+                        "posisi": item.posisi,
+                        "ipk": item.ipk,
+                        "created_at": item.created_at,
+                        "cv": cloudinary.api.resource_by_asset_id(item.user_cv.cv)[
+                            "secure_url"
+                        ],
+                        "pas_foto": cloudinary.api.resource_by_asset_id(
+                            item.user_pas_foto.pas_foto
+                        )["secure_url"],
+                        "ktp": cloudinary.api.resource_by_asset_id(item.user_ktp.ktp)[
+                            "secure_url"
+                        ],
+                        "krs": cloudinary.api.resource_by_asset_id(item.user_krs.krs)[
+                            "secure_url"
+                        ],
+                        "ktm": cloudinary.api.resource_by_asset_id(item.user_ktm.ktm)[
+                            "secure_url"
+                        ],
+                        "certificate": (
+                            cloudinary.api.resource_by_asset_id(
+                                item.user_certificate.certificate
+                            )["secure_url"]
+                            if item.user_certificate
+                            else None
+                        ),
+                        "rangkuman_nilai": item.user_rangkuman_nilai.rangkuman_nilai_id,
+                        "is_submit": item.is_submit[0].submit_id,
+                    }
+                )
+                for item in batch
+            ],
             "page": {
                 "current_page": current_page,
                 "current_data": paginated_items,
