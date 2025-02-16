@@ -2,8 +2,9 @@ from flask import jsonify
 import os
 from werkzeug.datastructures import FileStorage
 from ..databases import UserDatabase, BatchDatabase, UserFormDatabase
-from ..utils import generate_id
+from ..utils import generate_id, IsSubmitToken
 import cloudinary.uploader
+import datetime
 
 
 class FormController:
@@ -287,6 +288,8 @@ class FormController:
             "batch_id", batch_id=batch_id, user_id=user_id
         ):
             return jsonify({"message": "form already submitted"}), 409
+        created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
+        token = IsSubmitToken.insert(user_id, created_at)
 
         if not (
             batch_form := await UserFormDatabase.insert(
@@ -323,6 +326,7 @@ class FormController:
                     else user_certificate["asset_id"]
                 ),
                 user_certificate_id,
+                token,
             )
         ):
             return jsonify({"message": "batch not found"}), 404

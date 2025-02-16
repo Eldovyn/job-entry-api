@@ -50,6 +50,7 @@ class UserFormDatabase(Database):
         rangkuman_nilai_id,
         certificate,
         certificate_id,
+        token,
     ):
         if user_data := UsersModel.query.filter(UsersModel.user_id == user_id).first():
             if batch_data := BatchFormModel.query.filter(
@@ -86,7 +87,7 @@ class UserFormDatabase(Database):
                     if certificate
                     else None
                 )
-                is_submit = IsSubmitModel(user_form_id, batch_id, user_id)
+                is_submit = IsSubmitModel(user_form_id, batch_id, user_id, token)
 
                 db.session.add(user_form)
                 db.session.add(user_cv)

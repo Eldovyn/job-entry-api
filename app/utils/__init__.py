@@ -6,3 +6,4 @@ from .account_active_email import *
 from .account_active_web import *
 from .generate_key import *
 from .validation import *
+from .is_submit import *
