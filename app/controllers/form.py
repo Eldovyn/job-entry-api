@@ -330,5 +330,12 @@ class FormController:
             )
         ):
             return jsonify({"message": "batch not found"}), 404
-
-        return jsonify({"message": "success post form"}), 201
+        return (
+            jsonify(
+                {
+                    "message": "success post form",
+                    "data": batch_form.is_submit[0].to_dict(),
+                }
+            ),
+            201,
+        )
