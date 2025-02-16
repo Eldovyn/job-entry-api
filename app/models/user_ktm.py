@@ -7,12 +7,16 @@ class UserKtmModel(db.Model):
     __tablename__ = "user_ktm"
 
     ktm_id = Column(String, primary_key=True)
-    user_id = Column(String, ForeignKey("user_form.user_id", ondelete="CASCADE"))
+    user_form_id = Column(
+        String,
+        ForeignKey("user_form.user_form_id", ondelete="CASCADE"),
+        nullable=False,
+    )
     ktm = Column(String, nullable=False)
 
     user = relationship("UserFormModel", back_populates="user_ktm")
 
-    def __init__(self, ktm_id, user_id, ktm):
+    def __init__(self, ktm_id, user_form_id, ktm):
         self.ktm_id = ktm_id
-        self.user_id = user_id
+        self.user_form_id = user_form_id
         self.ktm = ktm

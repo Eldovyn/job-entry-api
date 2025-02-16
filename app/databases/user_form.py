@@ -11,6 +11,7 @@ from ..models import (
     UsersModel,
     BatchFormModel,
     UserCvModel,
+    IsSubmitModel,
 )
 import datetime
 from ..database import db
@@ -71,19 +72,21 @@ class UserFormDatabase(Database):
                     ipk=ipk,
                     created_at=datetime.datetime.now(datetime.timezone.utc).timestamp(),
                 )
-                user_cv = UserCvModel(cv_id, user_id, cv)
-                user_ktm = UserKtmModel(ktm_id, user_id, ktm)
-                user_krs = UserKrsModel(krs_id, user_id, krs)
-                user_pas_foto = UserPasFotoModel(pas_foto_id, user_id, pas_foto)
-                user_ktp = UserKtpModel(ktp_id, user_id, ktp)
+                user_cv = UserCvModel(cv_id, user_form_id, cv)
+                user_ktm = UserKtmModel(ktm_id, user_form_id, ktm)
+                user_krs = UserKrsModel(krs_id, user_form_id, krs)
+                user_pas_foto = UserPasFotoModel(pas_foto_id, user_form_id, pas_foto)
+                user_ktp = UserKtpModel(ktp_id, user_form_id, ktp)
                 user_rangkuman_nilai = UserRangkumanNilaiModel(
-                    rangkuman_nilai_id, user_id, rangkuman_nilai
+                    rangkuman_nilai_id, user_form_id, rangkuman_nilai
                 )
                 user_certificate = (
-                    UserCertificateModel(certificate_id, user_id, certificate)
+                    UserCertificateModel(certificate_id, user_form_id, certificate)
                     if certificate
                     else None
                 )
+                is_submit = IsSubmitModel(user_form_id)
+
                 db.session.add(user_form)
                 db.session.add(user_cv)
                 db.session.add(user_ktm)
@@ -94,6 +97,7 @@ class UserFormDatabase(Database):
                 db.session.add(user_rangkuman_nilai)
                 if user_certificate:
                     db.session.add(user_certificate)
+                db.session.add(is_submit)
                 db.session.commit()
                 return user_form
 

@@ -12,3 +12,4 @@ from .user_pas_foto import *
 from .user_ktp import *
 from .user_rangkuman_nilai import *
 from .user_krs import *
+from .is_submit import *

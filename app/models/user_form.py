@@ -6,11 +6,10 @@ from ..database import db
 class UserFormModel(db.Model):
     __tablename__ = "user_form"
     user_form_id = Column(String, primary_key=True)
-    user_id = Column(
-        String, ForeignKey("users.user_id", ondelete="CASCADE"), unique=True
-    )
+    user_id = Column(String, ForeignKey("users.user_id", ondelete="CASCADE"))
     batch_form_id = Column(
-        String, ForeignKey("batch_form.batch_form_id", ondelete="CASCADE")
+        String,
+        ForeignKey("batch_form.batch_form_id", ondelete="CASCADE"),
     )
     nama = Column(String, nullable=False)
     npm = Column(String, nullable=False)
@@ -61,6 +60,11 @@ class UserFormModel(db.Model):
         "UserPasFotoModel",
         uselist=False,
         back_populates="user",
+        cascade="all, delete",
+    )
+    is_submit = relationship(
+        "IsSubmitModel",
+        back_populates="batch_form",
         cascade="all, delete",
     )
 
