@@ -51,12 +51,12 @@ class BatchDatabase(Database):
             if role == "admin":
                 return BatchFormModel.query.filter(
                     BatchFormModel.batch_form_id == batch_id
-                ).first()
+                ).all()
             else:
                 return BatchFormModel.query.filter(
                     BatchFormModel.batch_form_id == batch_id,
                     BatchFormModel.is_active == True,
-                ).first()
+                ).all()
         if category == "title":
             if role == "admin":
                 list_batch = BatchFormModel.query.order_by(
