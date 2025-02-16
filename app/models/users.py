@@ -47,6 +47,9 @@ class UsersModel(db.Model):
         back_populates="user",
         cascade="all, delete",
     )
+    is_submit = relationship(
+        "IsSubmitModel", back_populates="user", cascade="all, delete"
+    )
 
     def __init__(self, user_id, username, email, password, created_at):
         self.user_id = user_id

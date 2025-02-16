@@ -8,6 +8,26 @@ import cloudinary.uploader
 
 class FormController:
     @staticmethod
+    async def get_form_is_submit(user_id, batch_id):
+        errors = {}
+        if len(batch_id.strip()) == 0:
+            errors["batch_id"] = ["batch_id cannot be empty"]
+        if errors:
+            return jsonify({"message": "input invalid", "errors": errors}), 400
+        if not (user := await UserDatabase.get("user_id", user_id=user_id)):
+            return jsonify({"message": "authorization invalid"}), 401
+        if not (
+            user_submit := await UserFormDatabase.get(
+                "batch_id", batch_id=batch_id, user_id=user_id
+            )
+        ):
+            return jsonify({"message": "form not found"}), 404
+        return (
+            jsonify({"message": "success get form", "data": user_submit.to_dict()}),
+            200,
+        )
+
+    @staticmethod
     async def get_form(role, user_id, batch_id, limit, per_page, current_page):
         errors = {}
         if len(batch_id.strip()) == 0:
@@ -264,7 +284,7 @@ class FormController:
         user_form_id = generate_id()
 
         if submit_form := await UserFormDatabase.get(
-            "is_submit", user_form_id=user_form_id
+            "batch_id", batch_id=batch_id, user_id=user_id
         ):
             return jsonify({"message": "form already submitted"}), 409
 

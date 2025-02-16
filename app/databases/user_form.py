@@ -85,7 +85,7 @@ class UserFormDatabase(Database):
                     if certificate
                     else None
                 )
-                is_submit = IsSubmitModel(user_form_id, batch_id)
+                is_submit = IsSubmitModel(user_form_id, batch_id, user_id)
 
                 db.session.add(user_form)
                 db.session.add(user_cv)
@@ -103,8 +103,13 @@ class UserFormDatabase(Database):
 
     @staticmethod
     async def get(category, **kwargs):
-        if category == "is_submit":
-            return IsSubmitModel.query.first()
+        batch_id = kwargs.get("batch_id")
+        user_id = kwargs.get("user_id")
+        if category == "batch_id":
+            return IsSubmitModel.query.filter(
+                IsSubmitModel.batch_form_id == batch_id,
+                IsSubmitModel.user_id == user_id,
+            ).first()
 
     @staticmethod
     async def delete(category, **kwargs):

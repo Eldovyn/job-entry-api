@@ -17,16 +17,24 @@ class IsSubmitModel(db.Model):
         String,
         ForeignKey("batch_form.batch_form_id", ondelete="CASCADE"),
     )
+    user_id = Column(String, ForeignKey("users.user_id", ondelete="CASCADE"))
 
-    user_form = relationship(
-        "UserFormModel", back_populates="is_submit", foreign_keys=[user_form_id]
-    )
+    user_form = relationship("UserFormModel", back_populates="is_submit")
     batch = relationship("BatchFormModel", back_populates="is_submit")
+    user = relationship("UsersModel", back_populates="is_submit")
 
-    def __init__(self, user_form_id, batch_form_id):
+    def __init__(self, user_form_id, batch_form_id, user_id):
         self.user_form_id = user_form_id
         self.batch_form_id = batch_form_id
+        self.user_id = user_id
         self.submit_id = generate_id()
 
     def __repr__(self):
         return f"<IsSubmit {self.submit_id!r}>"
+
+    def to_dict(self):
+        return {
+            "submit_id": self.submit_id,
+            "user_form_id": self.user_form_id,
+            "batch_form_id": self.batch_form_id,
+        }

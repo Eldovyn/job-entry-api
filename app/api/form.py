@@ -26,6 +26,7 @@ async def get_form_is_submitted():
     current_user = get_jwt_identity()
     data = request.args
     q = data.get("q", "")
+    return await FormController.get_form_is_submit(current_user, q)
 
 
 @form_router.post("/job-entry/form")
