@@ -32,6 +32,7 @@ class BatchDatabase(Database):
         title = kwargs.get("title")
         limit = kwargs.get("limit")
         role = kwargs.get("role")
+        user_id = kwargs.get("user_id")
         if category == "all_batch":
             if role == "admin":
                 return BatchFormModel.query.order_by(
@@ -83,6 +84,21 @@ class BatchDatabase(Database):
                 .limit(limit)
                 .all()
             )
+        if category == "title_data_mahasiswa":
+            list_mahasiswa = UserFormModel.query.order_by(
+                UserFormModel.created_at.desc()
+            ).all()
+            titles = [mahasiswa.nama for mahasiswa in list_mahasiswa]
+            matches = difflib.get_close_matches(title, titles, n=5, cutoff=0.5)
+            similar_mahasiswa = (
+                UserFormModel.query.order_by(UserFormModel.created_at.desc())
+                .filter(UserFormModel.nama.in_(matches))
+                .limit(limit)
+                .all()
+            )
+            return similar_mahasiswa
+        if category == "data_mahasiswa":
+            return UserFormModel.query.filter(UserFormModel.user_id == user_id).first()
 
     @staticmethod
     async def delete(category, **kwargs):
