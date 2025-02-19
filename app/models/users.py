@@ -48,6 +48,7 @@ class UsersModel(db.Model):
     is_submit = relationship(
         "IsSubmitModel", back_populates="user", cascade="all, delete"
     )
+    announcement = relationship("AnnountcementModel", back_populates="user")
 
     def __init__(self, user_id, username, email, password, created_at):
         self.user_id = user_id
