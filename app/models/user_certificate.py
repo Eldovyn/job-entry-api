@@ -1,6 +1,6 @@
-from sqlalchemy import Column, String, ForeignKey, Integer
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, String, ForeignKey
 from ..database import db
+from sqlalchemy.orm import relationship
 
 
 class UserCertificateModel(db.Model):
