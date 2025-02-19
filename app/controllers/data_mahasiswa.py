@@ -47,6 +47,10 @@ class DataMahasiswaController:
             data_mahasiswa.extend(data_mahasiswa_title)
         if data_mahasisw_id := await BatchDatabase.get("data_mahasiswa", user_id=q):
             data_mahasiswa.extend([data_mahasisw_id])
+        if data_mahasiswa_batch_id := await BatchDatabase.get(
+            "batch_id_data_mahasiswa", batch_id=q, limit=limit
+        ):
+            data_mahasiswa.extend(data_mahasiswa_batch_id)
         if not data_mahasiswa:
             return jsonify({"message": "batch not found"}), 404
         per_page = int(per_page) if per_page else 10

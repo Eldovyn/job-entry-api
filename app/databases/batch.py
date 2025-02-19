@@ -99,6 +99,12 @@ class BatchDatabase(Database):
             return similar_mahasiswa
         if category == "data_mahasiswa":
             return UserFormModel.query.filter(UserFormModel.user_id == user_id).first()
+        if category == "batch_id_data_mahasiswa":
+            return (
+                UserFormModel.query.filter(UserFormModel.batch_form_id == batch_id)
+                .limit(limit)
+                .all()
+            )
 
     @staticmethod
     async def delete(category, **kwargs):
