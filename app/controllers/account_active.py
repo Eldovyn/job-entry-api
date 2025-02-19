@@ -225,3 +225,68 @@ class AccountActiveController:
             ),
             200,
         )
+
+    @staticmethod
+    async def user_account_active_verification_validation(token):
+        created_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
+        if len(token.strip()) == 0:
+            return (
+                jsonify(
+                    {
+                        "message": "token cannot be empty",
+                        "errors": {"token": ["token cannot be empty"]},
+                    }
+                ),
+                400,
+            )
+        valid_token = await TokenAccountActiveEmail.get(token)
+        if not valid_token:
+            return (
+                jsonify(
+                    {
+                        "message": "token not found",
+                    }
+                ),
+                404,
+            )
+        if not (
+            user_token := await AccountActiveDatabase.get(
+                "account_active_email",
+                user_id=valid_token["user_id"],
+                token_email=token,
+            )
+        ):
+            return (
+                jsonify(
+                    {
+                        "message": "token not found",
+                    }
+                ),
+                404,
+            )
+        if user_token.expired_at <= int(created_at):
+            await AccountActiveDatabase.delete(
+                "user_id", user_id=valid_token["user_id"]
+            )
+            return (
+                jsonify(
+                    {
+                        "message": "token not found",
+                    }
+                ),
+                404,
+            )
+        return (
+            jsonify(
+                {
+                    "message": "success get user token",
+                    "data": {
+                        "token": token,
+                        "user_id": user_token.user.user_id,
+                        "email": user_token.user.email,
+                        "username": user_token.user.username,
+                    },
+                }
+            ),
+            200,
+        )

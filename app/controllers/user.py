@@ -13,6 +13,7 @@ from ..utils import (
 from ..task import send_email_task
 from ..config import job_entry_url
 import cloudinary.api
+import traceback
 
 
 class UserController:

@@ -19,6 +19,15 @@ async def account_active_email_verification():
     return await account_active_controller.user_account_active_verification(token)
 
 
+@account_active_router.get("/job-entry/account-active/validation/email-verification")
+async def account_active_email_verification_validation():
+    data = request.args
+    token = data.get("token", "")
+    return await account_active_controller.user_account_active_verification_validation(
+        token
+    )
+
+
 @account_active_router.get("/job-entry/account-active/page-verification")
 async def account_active_page():
     data = request.args
