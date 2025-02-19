@@ -53,6 +53,14 @@ class DataMahasiswaController:
             data_mahasiswa.extend(data_mahasiswa_batch_id)
         if not data_mahasiswa:
             return jsonify({"message": "batch not found"}), 404
+
+        user = await UserDatabase.get("user_id", user_id=user_id)
+        if not user.is_admin:
+            return (
+                jsonify({"message": "authorization invalid"}),
+                401,
+            )
+
         per_page = int(per_page) if per_page else 10
         current_page = int(current_page) if current_page else 1
 
@@ -231,6 +239,11 @@ class DataMahasiswaController:
             return jsonify({"message": "input invalid", "errors": errors}), 400
 
         user = await UserDatabase.get("user_id", user_id=user_id)
+        if not user.is_admin:
+            return (
+                jsonify({"message": "authorization invalid"}),
+                401,
+            )
 
         batch = await BatchDatabase.get("all_data_mahasiswa", limit=limit)
         if not batch:
@@ -417,6 +430,11 @@ class DataMahasiswaController:
             return jsonify({"message": "input invalid", "errors": errors}), 400
 
         user = await UserDatabase.get("user_id", user_id=user_id)
+        if not user.is_admin:
+            return (
+                jsonify({"message": "authorization invalid"}),
+                401,
+            )
 
         batch_data = await BatchDatabase.delete(
             "data_mahasiswa", user_id=target_user_id
