@@ -43,7 +43,6 @@ class UsersModel(db.Model):
     )
     user_form = relationship(
         "UserFormModel",
-        uselist=False,
         back_populates="user",
     )
     is_submit = relationship(

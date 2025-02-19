@@ -28,9 +28,7 @@ class UserFormModel(db.Model):
         nullable=False,
     )
 
-    user = relationship(
-        "UsersModel", uselist=False, back_populates="user_form", cascade="all, delete"
-    )
+    user = relationship("UsersModel", back_populates="user_form")
     batch = relationship("BatchFormModel", back_populates="user_form")
     user_ktm = relationship(
         "UserKtmModel", uselist=False, back_populates="user", cascade="all, delete"
