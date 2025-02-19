@@ -5,6 +5,15 @@ from ..controllers import DataMahasiswaController
 data_mahasiswa_router = Blueprint("data_mahasiswa_router", __name__)
 
 
+@data_mahasiswa_router.get("/job-entry/details/data-mahasiswa")
+@jwt_required()
+async def get_data_details_mahasiswa():
+    current_user = get_jwt_identity()
+    data = request.args
+    q = data.get("q", "")
+    return await DataMahasiswaController.get_data_mahasiswa(current_user, q)
+
+
 @data_mahasiswa_router.get("/job-entry/data-mahasiswa")
 @jwt_required()
 async def get_data_mahasiswa():

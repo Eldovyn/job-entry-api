@@ -212,6 +212,90 @@ class DataMahasiswaController:
         return jsonify(response_data), 200
 
     @staticmethod
+    async def get_data_mahasiswa(user_id, q):
+        errors = {}
+
+        if len(q.strip()) == 0:
+            errors["q"] = [q]
+
+        if errors:
+            return jsonify({"message": "input invalid", "errors": errors}), 400
+
+        user = await UserDatabase.get("user_id", user_id=user_id)
+        if not user.is_admin:
+            return (
+                jsonify({"message": "authorization invalid"}),
+                401,
+            )
+
+        if not (data_mahasiswa := await BatchDatabase.get("data_mahasiswa", user_id=q)):
+            return jsonify({"message": "data not found"}), 404
+
+        avatar_url = cloudinary.api.resource_by_asset_id(user.user_avatar.avatar)[
+            "secure_url"
+        ]
+
+        return jsonify(
+            {
+                "data": {
+                    "user_form_id": data_mahasiswa.user_form_id,
+                    "user_id": data_mahasiswa.user_id,
+                    "batch_form_id": data_mahasiswa.batch_form_id,
+                    "nama": data_mahasiswa.nama,
+                    "npm": data_mahasiswa.npm,
+                    "kelas": data_mahasiswa.kelas,
+                    "tempat_tanggal_lahir": data_mahasiswa.tempat_tanggal_lahir,
+                    "jurusan": data_mahasiswa.jurusan,
+                    "lokasi_kampus": data_mahasiswa.lokasi_kampus,
+                    "jenis_kelamin": data_mahasiswa.jenis_kelamin,
+                    "alamat": data_mahasiswa.alamat,
+                    "no_hp": data_mahasiswa.no_hp,
+                    "email": data_mahasiswa.email,
+                    "posisi": data_mahasiswa.posisi,
+                    "ipk": data_mahasiswa.ipk,
+                    "created_at": data_mahasiswa.created_at,
+                    "cv": cloudinary.api.resource_by_asset_id(
+                        data_mahasiswa.user_cv.cv
+                    )["secure_url"],
+                    "pas_foto": cloudinary.api.resource_by_asset_id(
+                        data_mahasiswa.user_pas_foto.pas_foto
+                    )["secure_url"],
+                    "ktp": cloudinary.api.resource_by_asset_id(
+                        data_mahasiswa.user_ktp.ktp
+                    )["secure_url"],
+                    "krs": cloudinary.api.resource_by_asset_id(
+                        data_mahasiswa.user_krs.krs
+                    )["secure_url"],
+                    "ktm": cloudinary.api.resource_by_asset_id(
+                        data_mahasiswa.user_ktm.ktm
+                    )["secure_url"],
+                    "rangkuman_nilai": cloudinary.api.resource_by_asset_id(
+                        data_mahasiswa.user_rangkuman_nilai.rangkuman_nilai
+                    )["secure_url"],
+                    "certificate": (
+                        cloudinary.api.resource_by_asset_id(
+                            data_mahasiswa.user_certificate.certificate
+                        )["secure_url"]
+                        if data_mahasiswa.user_certificate
+                        else None
+                    ),
+                    "is_submit": data_mahasiswa.is_submit[0].submit_id,
+                },
+                "message": "sucess get data user",
+                "user": {
+                    "user_id": user.user_id,
+                    "username": user.username,
+                    "email": user.email,
+                    "is_active": user.is_active,
+                    "is_admin": user.is_admin,
+                    "avatar": avatar_url,
+                    "created_at": user.created_at,
+                    "updated_at": user.updated_at,
+                },
+            }
+        )
+
+    @staticmethod
     async def get_all_data_mahasiswa(export, user_id, limit, per_page, current_page):
         def validate_input(value, param_name):
             if value and not value.isdigit():
