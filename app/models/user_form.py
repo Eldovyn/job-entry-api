@@ -1,7 +1,6 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from ..database import db
-import cloudinary.api
 
 
 class UserFormModel(db.Model):
@@ -135,5 +134,5 @@ class UserFormModel(db.Model):
                 self.user_certificate.certificate_id if self.user_certificate else None
             ),
             "rangkuman_nilai": self.user_rangkuman_nilai.rangkuman_nilai_id,
-            "is_submit": self.is_submit[0].submit_id,
+            "is_submit": self.is_submit[0].submit_id if self.is_submit else None,
         }

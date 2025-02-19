@@ -103,9 +103,17 @@ class BatchDatabase(Database):
     @staticmethod
     async def delete(category, **kwargs):
         batch_id = kwargs.get("batch_id")
+        user_id = kwargs.get("user_id")
         if category == "batch_id":
             if data := BatchFormModel.query.filter(
                 BatchFormModel.batch_form_id == batch_id
+            ).first():
+                db.session.delete(data)
+                db.session.commit()
+                return data
+        if category == "data_mahasiswa":
+            if data := UserFormModel.query.filter(
+                UserFormModel.user_id == user_id
             ).first():
                 db.session.delete(data)
                 db.session.commit()

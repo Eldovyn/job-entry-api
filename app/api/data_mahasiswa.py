@@ -41,3 +41,18 @@ async def get_export_data_mahasiswa():
         return await DataMahasiswaController.get_data_mahasiswa_title_id(
             True, current_user, q, limit, per_page, current_page
         )
+
+
+@data_mahasiswa_router.delete("/job-entry/data-mahasiswa")
+@jwt_required()
+async def delete_data_mahasiswa():
+    current_user = get_jwt_identity()
+    data = request.args
+    json = request.json
+    limit = data.get("limit", None)
+    per_page = data.get("per_page", "5")
+    current_page = data.get("current_page", "1")
+    target_user_id = json.get("target_user_id", "")
+    return await DataMahasiswaController.delete_data_mahasiswa(
+        current_user, limit, per_page, current_page, target_user_id
+    )

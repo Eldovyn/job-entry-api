@@ -45,7 +45,6 @@ class UsersModel(db.Model):
         "UserFormModel",
         uselist=False,
         back_populates="user",
-        cascade="all, delete",
     )
     is_submit = relationship(
         "IsSubmitModel", back_populates="user", cascade="all, delete"
